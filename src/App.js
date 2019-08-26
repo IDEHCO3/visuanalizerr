@@ -17,6 +17,7 @@ import BaseLayer from './components/BaseLayer';
 import BaseHyperResource from './components/BaseHyperResource';
 import BaseWMS from './components/BaseWMS';
 import SelectedListLayer from './components/SelectedListLayer';
+import Button from '@material-ui/core/Button';
 import axios from 'axios';
 import {request} from './utils/requests';
 import Overlay from 'ol/Overlay';

@@ -6,13 +6,14 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import Switch from '@material-ui/core/Switch';
-import InfoIcon from '@material-ui/icons/Info';
+import {InfoIcon, Image} from '@material-ui/icons';
 import IconButton from '@material-ui/core/IconButton';
 import { request } from '../utils/requests';
+
 import axios from 'axios';
 import OptionsHyperResourceDialog from './OptionsHyperResourceDialog'
 import { OptionsLayer} from './../utils/LayerResource';
+import { Button } from '@material-ui/core';
 const styles = theme => ({
   root: {
     width: '100%',
@@ -25,14 +26,15 @@ const styles = theme => ({
     padding: 10,
   }
 });
+
+
 function ListLayer(props) {
   const classes = props;
   const [isOpen,setIsOpen ] = useState(false);
   const [optionsLayer, setOptionsLayer] = useState(null);
   
-    function switchHandleChange(event, is_ckecked) {
-        event.target.disabled = true
-        props.selectedItemName(event.target.value)
+    function handleClick(event, item) {
+      props.selectedItemName(item.name)
     };
   
     async function iconHandleClickInfo(event, item) {
@@ -56,9 +58,10 @@ function ListLayer(props) {
               <ListItemIcon>
                 <IconButton className={classes.iconButton} color="primary" aria-label="Info" onClick={(e) =>iconHandleClickInfo(e, item)}><InfoIcon /></IconButton>
               </ListItemIcon>
-              <ListItemText id="switch-list-label-wifi"  primary={item.name} />
+              <ListItemText  primary={item.name} />
               <ListItemSecondaryAction>
-                <Switch edge="end"  onChange={switchHandleChange} value={item.name}  inputProps={{ 'aria-labelledby': 'switch-list-label-wifi' }} />
+                <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClick(e,item)}> imagem </Button>
+                <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClick(e,item)}> Baixar </Button>
               </ListItemSecondaryAction>
             </ListItem>
           ))}  

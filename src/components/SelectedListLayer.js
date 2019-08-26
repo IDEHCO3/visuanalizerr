@@ -26,39 +26,39 @@ const styles = theme => ({
 });
 function ListLayer(props) {
   const classes = props;
-  
+
 
   function switchHandleChange(event, is_ckecked) {
-     // console.log(event.target)    
-     
-      props.switchSelectedLayerResource(event.target.value, is_ckecked)
-      //event.target.forceUpdate()
+    // console.log(event.target)    
+
+    props.switchSelectedLayerResource(event.target.value, is_ckecked)
+    //event.target.forceUpdate()
   };
   function iconHandleClickInfo(e, layer) {
-      props.infoSelectedLayerResource(layer)
+    props.infoSelectedLayerResource(layer)
   }
-  
+
   function iconHandleClickDelete(e, layer) {
     props.deleteSelectedLayerResource(layer);
   }
 
   return (
     <div className={classes.root}>
-       <List>
+      <List>
         {props.layersResource.map(layer => (
           <ListItem key={layer.name}>
             <ListItemIcon>
-              <IconButton className={classes.iconButton} value={layer} color="primary" aria-label="Info" onClick={(e) =>iconHandleClickInfo(e, layer)}><InfoIcon /></IconButton>
+              <IconButton className={classes.iconButton} value={layer} color="primary" aria-label="Info" onClick={(e) => iconHandleClickInfo(e, layer)}><InfoIcon /></IconButton>
             </ListItemIcon>
             <ListItemIcon>
-              <IconButton className={classes.iconButton} color="secondary" aria-label="Info" onClick={(e) =>iconHandleClickDelete(e, layer)}><DeleteIcon /></IconButton>
+              <IconButton className={classes.iconButton} color="secondary" aria-label="Info" onClick={(e) => iconHandleClickDelete(e, layer)}><DeleteIcon /></IconButton>
             </ListItemIcon>
             <ListItemText id="switch-list-label-wifi" primary={layer.name} />
             <ListItemSecondaryAction>
-              <Switch edge="end" onChange={switchHandleChange} checked={layer.activated} value={layer.name}  />
+            <Switch edge="end" onChange={switchHandleChange} checked={layer.activated} value={layer.name} />
             </ListItemSecondaryAction>
           </ListItem>
-        ))}   
+        ))}
       </List>
     </div>
   );

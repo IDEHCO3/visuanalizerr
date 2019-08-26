@@ -36,7 +36,7 @@ const styles = theme => ({
 
 function BaseHyperResource(props) {
   const classes = props;
-  const [select_url,setSelect_url ] = useState('');
+  const [select_url, setSelect_url ] = useState('');
   const [text_url, setText_url] =  useState('');
   const [items, setItems] = useState([]);
   
@@ -48,8 +48,12 @@ function BaseHyperResource(props) {
   function selectedItemName(item_name) {
     let an_item = null
     items.forEach((item, index) => {
-        if (item.name === item_name)
-          return an_item = item;
+      //console.log("nome do array: ",item.name, "nome passado:", item_name) 
+      if (item.name === item_name){
+        console.log("entrou no if")
+        return an_item = item;
+      }
+          
     })
     if (an_item) {
       props.addLayerFromHyperResource(new GeoHyperLayerResource(null, an_item.url, an_item.name ))

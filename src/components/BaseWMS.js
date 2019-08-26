@@ -35,7 +35,7 @@ const styles = theme => ({
 
 function BaseWMS(props) {
   const classes = props;
-  const [select_url,setSelect_url ] = useState('');
+  const [select_url] = useState('');
   const [text_url, setText_url] =  useState('');
   const [items, setItems] = useState([]);
 
