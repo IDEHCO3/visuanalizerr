@@ -6,7 +6,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import {InfoIcon, Image} from '@material-ui/icons';
+import InfoIcon from '@material-ui/icons/Info';
+import ImageIcon from '@material-ui/icons/Image';
+import GrainIcon from '@material-ui/icons/Grain';
 import IconButton from '@material-ui/core/IconButton';
 import { request } from '../utils/requests';
 
@@ -14,6 +16,7 @@ import axios from 'axios';
 import OptionsHyperResourceDialog from './OptionsHyperResourceDialog'
 import { OptionsLayer} from './../utils/LayerResource';
 import { Button } from '@material-ui/core';
+import { func } from 'prop-types';
 const styles = theme => ({
   root: {
     width: '100%',
@@ -32,9 +35,14 @@ function ListLayer(props) {
   const classes = props;
   const [isOpen,setIsOpen ] = useState(false);
   const [optionsLayer, setOptionsLayer] = useState(null);
+  const [isImage, setIsImage] = useState(false);
   
-    function handleClick(event, item) {
+    function handleClickAddLayer(event, item) {
       props.selectedItemName(item.name)
+    };
+
+    function handleClickImageOrVector() {
+      setIsImage(!isImage)
     };
   
     async function iconHandleClickInfo(event, item) {
@@ -60,8 +68,10 @@ function ListLayer(props) {
               </ListItemIcon>
               <ListItemText  primary={item.name} />
               <ListItemSecondaryAction>
-                <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClick(e,item)}> imagem </Button>
-                <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClick(e,item)}> Baixar </Button>
+                <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickImageOrVector(e,item)}>
+                  { isImage ? <ImageIcon/> : <GrainIcon/> }
+                </Button>
+                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickAddLayer()}> Baixar </Button>
               </ListItemSecondaryAction>
             </ListItem>
           ))}  
