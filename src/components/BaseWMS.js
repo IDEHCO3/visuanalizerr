@@ -108,7 +108,9 @@ function BaseWMS(props) {
             </Grid>
             <Grid item xs={1}>
               <Tooltip title="Remover camadas" aria-label="Add">
-                <IconButton className={classes.iconButton} aria-label="Search" onClick={iconHandleClickHighlightOff} bottom="true" ><HighlightOffIcon  color="error" /></IconButton>
+              <IconButton className={classes.iconButton} aria-label="Search" onClick={iconHandleClickHighlightOff} bottom="true" >
+                <HighlightOffIcon  color="error"/>
+              </IconButton>
               </Tooltip >
             </Grid>
           </Grid>

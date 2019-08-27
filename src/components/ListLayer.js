@@ -6,17 +6,13 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import InfoIcon from '@material-ui/icons/Info';
-import ImageIcon from '@material-ui/icons/Image';
-import GrainIcon from '@material-ui/icons/Grain';
-import IconButton from '@material-ui/core/IconButton';
 import { request } from '../utils/requests';
+import { Button, IconButton, Tooltip, ButtonGroup } from '@material-ui/core';
+import Icon from '@material-ui/core/Icon';
 
 import axios from 'axios';
 import OptionsHyperResourceDialog from './OptionsHyperResourceDialog'
 import { OptionsLayer} from './../utils/LayerResource';
-import { Button } from '@material-ui/core';
-import { func } from 'prop-types';
 const styles = theme => ({
   root: {
     width: '100%',
@@ -64,14 +60,28 @@ function ListLayer(props) {
           { props.items.map( item => (
             <ListItem key={item.name}>
               <ListItemIcon>
-                <IconButton className={classes.iconButton} color="primary" aria-label="Info" onClick={(e) =>iconHandleClickInfo(e, item)}><InfoIcon /></IconButton>
+                <IconButton className={classes.iconButton} color="primary" aria-label="Info" onClick={(e) =>iconHandleClickInfo(e, item)}>
+                  <Icon>info</Icon>
+                </IconButton>
               </ListItemIcon>
               <ListItemText  primary={item.name} />
               <ListItemSecondaryAction>
-                <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickImageOrVector(e,item)}>
-                  { isImage ? <ImageIcon/> : <GrainIcon/> }
-                </Button>
-                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickAddLayer()}> Baixar </Button>
+                <ButtonGroup color="primary" aria-label="outlined primary button group">
+                    <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickImageOrVector(e,item)}>
+                    { isImage ? 
+                      <Tooltip title="Imagem" aria-label="Add">
+                        <Icon>image</Icon>
+                      </Tooltip> 
+                      : 
+                      <Tooltip title="Vetor" aria-label="Add">
+                      <Icon>grain</Icon>
+                      </Tooltip>
+                       }
+                    </Button>
+                  <Tooltip title="Adicionar camada" aria-label="Add">
+                    <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickAddLayer(e,item)}> <Icon>get_app</Icon> </Button>
+                  </Tooltip>
+                </ButtonGroup>
               </ListItemSecondaryAction>
             </ListItem>
           ))}  

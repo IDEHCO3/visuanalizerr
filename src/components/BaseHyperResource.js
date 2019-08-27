@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
-import NativeSelect from '@material-ui/core/NativeSelect';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import IconButton from '@material-ui/core/IconButton';
+import { Button, NativeSelect, Tooltip } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
 import {request} from './../utils/requests';
 import {GeoHyperLayerResource, OptionsLayer} from './../utils/LayerResource';
 import ListLayer from './ListLayer';
@@ -99,16 +98,18 @@ function BaseHyperResource(props) {
           <Grid item xs={10}>
              <TextField  id="standard-name" label="Url"  className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"  fullWidth/>
           </Grid>
-          <Grid item xs={1}>
-              <Tooltip title="Pesquisar camadas" aria-label="Add">
-                <IconButton className={classes.iconButton} aria-label="Search" onClick={iconHandleClickSearch} bottom="true" ><SearchIcon color="primary"/></IconButton>
-              </Tooltip>  
-          </Grid>
-          <Grid item xs={1}>
+          <ButtonGroup color="primary" aria-label="outlined primary button group">
+            <Tooltip title="Pesquisar camadas" aria-label="Add">
+              <Button color="primary" className={classes.Button} aria-label="Search" onClick={iconHandleClickSearch}>
+                <SearchIcon color="primary"/>
+              </Button>
+            </Tooltip>
             <Tooltip title="Remover camadas" aria-label="Add">
-              <IconButton className={classes.iconButton} aria-label="Search" onClick={iconHandleClickHighlightOff} bottom="true" ><HighlightOffIcon  color="error" /></IconButton>
-            </Tooltip >
-          </Grid>
+              <Button color="primary" className={classes.Button}  aria-label="Search" onClick={iconHandleClickHighlightOff}> 
+                <HighlightOffIcon  color="error" /> 
+              </Button>
+            </Tooltip>
+          </ButtonGroup>
         </Grid>
       </FormControl>
       <ListLayer items={items} selectedItemName={selectedItemName}/>
