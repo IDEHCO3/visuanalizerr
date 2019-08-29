@@ -94,14 +94,14 @@ function BaseHyperResource(props) {
           <option value="http://ggt-des.ibge.gov.br/api/bcim/">Base Cartográfica Contínua do Brasil ao Milionésimo-IBGE</option>
           <option value="http://ggt-des.ibge.gov.br/api/osm-2017-06/">Base vetorial do OpenStreetMap de 2017-06</option>
         </NativeSelect>
-        <Grid container spacing={8}>
+        <Grid container spacing={2} direction="center">
           <Grid item xs={10}>
              <TextField  id="standard-name" label="Url"  className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"  fullWidth/>
           </Grid>
-          <ButtonGroup color="primary" aria-label="outlined primary button group">
+          <ButtonGroup variant="contained" color="default" aria-label="outlined primary button group">
             <Tooltip title="Pesquisar camadas" aria-label="Add">
               <Button color="primary" className={classes.Button} aria-label="Search" onClick={iconHandleClickSearch}>
-                <SearchIcon color="primary"/>
+                <SearchIcon color="default"/>
               </Button>
             </Tooltip>
             <Tooltip title="Remover camadas" aria-label="Add">

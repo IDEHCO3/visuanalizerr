@@ -23,8 +23,19 @@ const styles = theme => ({
   },
   iconButton: {
     padding: 10,
+  },
+
+  urlStyle: {
+  top: '20px' ,
+  left: '-20px' 
   }
 });
+
+const urlStyle = {
+  top: '20px',
+  left: '-20px' 
+};
+
 
 
 function ListLayer(props) {
@@ -56,7 +67,7 @@ function ListLayer(props) {
     }
     return (
       <div className={classes.root}>
-        <List subheader={<ListSubheader>Url das camadas</ListSubheader>} className={classes.root}>
+        <List subheader={<ListSubheader>Url das camadas</ListSubheader>} className={classes.root} style={urlStyle}>
           { props.items.map( item => (
             <ListItem key={item.name}>
               <ListItemIcon>
