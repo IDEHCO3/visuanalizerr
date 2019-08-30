@@ -17,10 +17,7 @@ import BaseLayer from './components/BaseLayer';
 import BaseHyperResource from './components/BaseHyperResource';
 import BaseWMS from './components/BaseWMS';
 import SelectedListLayer from './components/SelectedListLayer';
-import Button from '@material-ui/core/Button';
-import axios from 'axios';
 import {request} from './utils/requests';
-import Overlay from 'ol/Overlay';
 
 const styles = theme => ({
   root: {
@@ -50,7 +47,7 @@ const styles = theme => ({
 function App(props) {
     const classes = props;
     const [facadeOL, setFacadeOL] = useState(new FacadeOL());
-    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+    const [drawerIsOpen, setDrawerIsOpen] = useState(true);
     const [layersResource, setLayersResource] = useState([]);
     const [popupElementRef, setPopupElementRef]  = useState(React.createRef())
     
@@ -64,7 +61,6 @@ function App(props) {
        
     };
     
-    
     function infoSelectedLayerResource(a_selected_layer) {
         console.log(a_selected_layer)
     };
@@ -75,20 +71,20 @@ function App(props) {
       facadeOL.map.removeLayer(a_resource_layer.layer)
       
     };
+
     async function getUpdatedLayerFromLayersResource(layer_resource_name, is_checked) {
       let a_resource_layer = null
       const arr = layersResource.map( (layer_resource) => {
           if (layer_resource.name ===  layer_resource_name) {
-              layer_resource.activated = is_checked
-              a_resource_layer = layer_resource
+            layer_resource.activated = is_checked
+            a_resource_layer = layer_resource
           }
           return layer_resource                  
       })
-       setLayersResource(arr)
-       return a_resource_layer
-       
-      
+      setLayersResource(arr)
+      return a_resource_layer
     };
+
     async function switchSelectedLayerResource(layer_resource_name, is_checked) {
       let a_resource_layer = await getUpdatedLayerFromLayersResource(layer_resource_name, is_checked)
       
@@ -121,23 +117,31 @@ function App(props) {
 
     }
     function styleFromHeaders(headers) {
-      
       return extractIRIFromLinkHeaders('stylesheet', headers)
-     
     };
+
     async function addLayerFromHyperResource(a_GeoHyperLayerResource) {
-      
-      const response = await request(a_GeoHyperLayerResource.iri);
-      const headers = response.headers
-      const style_iri = styleFromHeaders(headers)
-      console.log(style_iri)
-      let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
-      a_GeoHyperLayerResource.layer = vector_layer_ol
-      let arr = layersResource.concat([a_GeoHyperLayerResource]) 
-      setLayersResource(arr)
-       a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-       console.log(layersResource)
-       
+
+      if (a_GeoHyperLayerResource.is_image)
+      {
+        let  image_layer_ol = await facadeOL.addHyperResourceImageLayer(a_GeoHyperLayerResource.iri)  
+        a_GeoHyperLayerResource.layer = image_layer_ol
+        let arr = layersResource.concat([a_GeoHyperLayerResource]) 
+        setLayersResource(arr)
+        a_GeoHyperLayerResource.layer.setZIndex(arr.length)
+        return
+      } else {
+        const response = await request(a_GeoHyperLayerResource.iri);
+        const headers = response.headers
+        const style_iri = styleFromHeaders(headers)
+        console.log(style_iri)
+        let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
+        a_GeoHyperLayerResource.layer = vector_layer_ol
+        let arr = layersResource.concat([a_GeoHyperLayerResource]) 
+        setLayersResource(arr)
+        a_GeoHyperLayerResource.layer.setZIndex(arr.length)
+        console.log(layersResource)
+      }  
       
     };
 

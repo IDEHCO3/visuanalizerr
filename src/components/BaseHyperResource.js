@@ -26,9 +26,9 @@ const styles = theme => ({
         marginTop: 10,
     },
     textField: {
-      marginLeft: 10,
-      marginRight: 10,
-      width: 200,
+      marginLeft: '10px',
+      marginRight: '10px',
+      width: '20px',
     },
   
  });
@@ -44,18 +44,18 @@ function BaseHyperResource(props) {
     return id !== -1
   };
   
-  function selectedItemName(item_name) {
+  function selectedItemName(item_name, isImage) {
+    
     let an_item = null
     items.forEach((item, index) => {
       //console.log("nome do array: ",item.name, "nome passado:", item_name) 
       if (item.name === item_name){
-        console.log("entrou no if")
         return an_item = item;
       }
           
     })
     if (an_item) {
-      props.addLayerFromHyperResource(new GeoHyperLayerResource(null, an_item.url, an_item.name ))
+      props.addLayerFromHyperResource(new GeoHyperLayerResource(null, an_item.url, an_item.name, null, null ,isImage ))
     }
   };
 
@@ -74,7 +74,8 @@ function BaseHyperResource(props) {
     let arr = [];
     if (isEntryPoint(result.headers)) { 
       let json_entry_point = result.data;
-      Object.entries(json_entry_point).forEach( ([key, value]) => { arr.push({name: key, url: value}); });  
+      // Criando array de camadas
+      Object.entries(json_entry_point).forEach( ([key, value]) => { arr.push({name: key, url: value, isImage: false}); });  
           
     } else {
        let url_entrada = text_url
@@ -94,22 +95,23 @@ function BaseHyperResource(props) {
           <option value="http://ggt-des.ibge.gov.br/api/bcim/">Base Cartográfica Contínua do Brasil ao Milionésimo-IBGE</option>
           <option value="http://ggt-des.ibge.gov.br/api/osm-2017-06/">Base vetorial do OpenStreetMap de 2017-06</option>
         </NativeSelect>
-        <Grid container spacing={2} direction="center">
+        <Grid container spacing={2} >
           <Grid item xs={10}>
-             <TextField  id="standard-name" label="Url"  className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"  fullWidth/>
+             <TextField  id="standard-name" label="Url"  className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"/>
+             <ButtonGroup variant="contained" color="default" aria-label="outlined primary button group">
+                <Tooltip title="Pesquisar camadas" aria-label="Add">
+                  <Button color="primary" className={classes.button} aria-label="Search" onClick={iconHandleClickSearch} >
+                    <SearchIcon/>
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Remover camadas" aria-label="Add">
+                  <Button color="primary" className={classes.button}  aria-label="Search" onClick={iconHandleClickHighlightOff}> 
+                    <HighlightOffIcon  color="error" /> 
+                  </Button>
+                </Tooltip>
+              </ButtonGroup>
           </Grid>
-          <ButtonGroup variant="contained" color="default" aria-label="outlined primary button group">
-            <Tooltip title="Pesquisar camadas" aria-label="Add">
-              <Button color="primary" className={classes.Button} aria-label="Search" onClick={iconHandleClickSearch}>
-                <SearchIcon color="default"/>
-              </Button>
-            </Tooltip>
-            <Tooltip title="Remover camadas" aria-label="Add">
-              <Button color="primary" className={classes.Button}  aria-label="Search" onClick={iconHandleClickHighlightOff}> 
-                <HighlightOffIcon  color="error" /> 
-              </Button>
-            </Tooltip>
-          </ButtonGroup>
+          
         </Grid>
       </FormControl>
       <ListLayer items={items} selectedItemName={selectedItemName}/>

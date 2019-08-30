@@ -1,28 +1,22 @@
 //import 'ol/ol.css';
 import 'ol-popup/src/ol-popup.css';
+import Popup from 'ol-popup';
+import {toStringHDMS} from 'ol/coordinate';
+import { transform } from 'ol/proj';
 import Map from 'ol/Map'
 import View from 'ol/View'
-import TileLayer from 'ol/layer/Tile'
-import XYZ from 'ol/source/XYZ'
-//import OSM from 'ol/source/XYZ'
-import TileImage from 'ol/source/TileImage'
-import ImageLayer from 'ol/layer/Image'
-import ImageWMS from 'ol/source/ImageWMS'
-import Vector from 'ol/source/Vector'
-import GeoJSON from 'ol/format/GeoJSON'
-import VectorLayer from 'ol/layer/Vector'
-import  Style from 'ol/style/Style'
-import  Icon from 'ol/style/Icon'
-import Overlay from 'ol/Overlay';
-import WMSCapabilities from 'ol/format/WMSCapabilities'
-//import {transformExtent} from 'ol/proj'
-import Stroke from 'ol/style/Stroke'
 import Graticule from 'ol/Graticule'
-import axios from 'axios';
+
+import TileLayer from 'ol/layer/Tile'
+import ImageLayer from 'ol/layer/Image'
+import VectorLayer from 'ol/layer/Vector'
+
+import { ImageStatic, ImageWMS, Vector, XYZ, TileImage } from 'ol/source'
+import { Style, Icon, Stroke } from 'ol/style'
+import WMSCapabilities from 'ol/format/WMSCapabilities'
+import GeoJSON from 'ol/format/GeoJSON'
 import { WMSCapabilityLayer} from './LayerResource'
-import {toStringHDMS} from 'ol/coordinate';
-import Popup from 'ol-popup';
-import { transform } from 'ol/proj';
+import axios from 'axios';
 import {request} from './requests';
 export class FacadeOL {
     constructor(id_map='map', coordinates_center=[-4331024.58685793, -1976355.8033415168], a_zoom_value = 4, a_baseLayer_name='OSM' ) {
@@ -149,7 +143,7 @@ export class FacadeOL {
     }
 
     onClickMap() {
-      this.map.on('singleclick', (evt)=> {
+      this.map.on('singleclick', (evt) => {
         let layer = null
         let feature = this.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) { return feature})  
         this.displayFeatureInfo(evt, feature, layer)
@@ -162,6 +156,7 @@ export class FacadeOL {
     //createHyperResourceLayer(name, iri) {
     //  return new HyperResourceLayer(name, iri);
     //}
+
     async addVectorLayerFromGeoJSON(geoJson, style_iri) {
       let style = null
       
@@ -186,13 +181,36 @@ export class FacadeOL {
           return vector_layer
       }
     }
+
+    async addHyperResourceImageLayer (url) {
+      let coordinates
+      try {
+        coordinates = await axios.get(`${url}/envelope/transform/3857&true`) // implementar verificação se a url termina com '/' ou nao antes de colocar a '/' antes de envelope
+      }
+      catch(error){
+        console.log(' --- Houve algum erro na requisição. --- \n', error)
+      }
+      
+      const extent = coordinates.data.coordinates[0][0].concat(coordinates.data.coordinates[0][2])
+      let image_layer =  new ImageLayer({
+        source: new ImageStatic({
+          url: `${url}/.png`, // implementar verificação se a url termina com '/' ou nao antes de colocar a '/' antes de .png
+          crossOrigin: '',
+          projection: 'EPSG:3857',
+          imageExtent: extent
+        })
+      })
+      this.map.addLayer(image_layer)
+      return image_layer
+    }
+
     async addHyperResourceLayer(a_HyperResourceLayer) {
       let resp_get
       try {
-         resp_get = await axios.get(a_HyperResourceLayer.iri)
+        resp_get = await axios.get(a_HyperResourceLayer.iri)
       }
-      catch(err) {
-        console.log('Houve algum erro na requisição. ', err)
+      catch(error) {
+        console.log('Houve algum erro na requisição. ', error)
       }
       const gjson_format = new GeoJSON().readFeatures(resp_get.data, {featureProjection: this.map.getView().getProjection()})
       const vector_source = new Vector({features: gjson_format})

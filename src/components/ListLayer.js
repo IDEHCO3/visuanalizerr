@@ -26,8 +26,8 @@ const styles = theme => ({
   },
 
   urlStyle: {
-  top: '20px' ,
-  left: '-20px' 
+    top: '20px' ,
+    left: '-20px' 
   }
 });
 
@@ -40,21 +40,22 @@ const urlStyle = {
 
 function ListLayer(props) {
   const classes = props;
-  const [isOpen,setIsOpen ] = useState(false);
-  const [optionsLayer, setOptionsLayer] = useState(null);
-  const [isImage, setIsImage] = useState(false);
+  const [ isOpen, setIsOpen ] = useState(false);
+  const [ optionsLayer, setOptionsLayer ] = useState(null);
+  const [ isImageCopy, setIsImageCopy ] = useState(false);
   
     function handleClickAddLayer(event, item) {
-      props.selectedItemName(item.name)
+      props.selectedItemName(item.name, item.isImage)
     };
 
-    function handleClickImageOrVector() {
-      setIsImage(!isImage)
+    function handleClickImageOrVector(event, item) {
+      setIsImageCopy(!isImageCopy)
+      item.isImage = !item.isImage
     };
   
-    async function iconHandleClickInfo(event, item) {
-      
+    async function iconHandleClickInfo(event, item) {      
       setIsOpen(true)
+      
       let response = await request(item.url, axios.options)
       let json = response.data
       console.log(json)
@@ -72,25 +73,27 @@ function ListLayer(props) {
             <ListItem key={item.name}>
               <ListItemIcon>
                 <IconButton className={classes.iconButton} color="primary" aria-label="Info" onClick={(e) =>iconHandleClickInfo(e, item)}>
-                  <Icon>info</Icon>
+                    <Tooltip title="Informações da camada" aria-label="Add">
+                      <Icon>info</Icon>
+                    </Tooltip> 
                 </IconButton>
               </ListItemIcon>
               <ListItemText  primary={item.name} />
               <ListItemSecondaryAction>
                 <ButtonGroup color="primary" aria-label="outlined primary button group">
-                    <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickImageOrVector(e,item)}>
-                    { isImage ? 
-                      <Tooltip title="Imagem" aria-label="Add">
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickImageOrVector(e, item)}>
+                    { item.isImage ? 
+                      <Tooltip title="Tipo da Camada: Imagem" aria-label="Add">
                         <Icon>image</Icon>
                       </Tooltip> 
                       : 
-                      <Tooltip title="Vetor" aria-label="Add">
+                      <Tooltip title="Tipo da Camada: Vetor" aria-label="Add">
                       <Icon>grain</Icon>
                       </Tooltip>
-                       }
-                    </Button>
+                    }
+                  </Button>
                   <Tooltip title="Adicionar camada" aria-label="Add">
-                    <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickAddLayer(e,item)}> <Icon>get_app</Icon> </Button>
+                    <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickAddLayer(e, item)}> <Icon>queue</Icon> </Button>
                   </Tooltip>
                 </ButtonGroup>
               </ListItemSecondaryAction>

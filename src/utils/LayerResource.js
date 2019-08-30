@@ -29,10 +29,11 @@ class AbstractLayerResource {
 }
 
 export class GeoHyperLayerResource extends AbstractLayerResource {
-  constructor(layer, iri, name, iri_style, iri_metadata) {
+  constructor(layer, iri, name, iri_style, iri_metadata, is_image) {
     super(layer, iri, name,)
     this.iri_style= iri_style
     this.iri_metadata =  iri_metadata
+    this.is_image = is_image
   }
   
 }
