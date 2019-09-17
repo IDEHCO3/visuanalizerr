@@ -49,7 +49,7 @@ function App(props) {
     const [facadeOL, setFacadeOL] = useState(new FacadeOL());
     const [drawerIsOpen, setDrawerIsOpen] = useState(true);
     const [layersResource, setLayersResource] = useState([]);
-    const [popupElementRef, setPopupElementRef]  = useState(React.createRef())
+    const [popupElementRef]  = useState(React.createRef())
     
     function buttonClicked(e)    {
       setDrawerIsOpen(!drawerIsOpen)
@@ -189,11 +189,12 @@ function App(props) {
                 <ExpansionPanel>
                   <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}><LayersIcon className={classes.icon } color="inherit" /><Typography > Camadas selecionadas</Typography></ExpansionPanelSummary>
                   <ExpansionPanelDetails>  
-                    <SelectedListLayer layersResource={layersResource} 
-                                       infoSelectedLayerResource={infoSelectedLayerResource}
-                                       deleteSelectedLayerResource={deleteSelectedLayerResource}
-                                       switchSelectedLayerResource={switchSelectedLayerResource}/> 
-
+                    <SelectedListLayer 
+                      layersResource={layersResource} 
+                      infoSelectedLayerResource={infoSelectedLayerResource}
+                      deleteSelectedLayerResource={deleteSelectedLayerResource}
+                      switchSelectedLayerResource={switchSelectedLayerResource}
+                    /> 
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               </div>

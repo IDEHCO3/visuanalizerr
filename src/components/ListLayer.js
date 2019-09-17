@@ -61,16 +61,16 @@ function ListLayer(props) {
       console.log(json)
       let an_optionsLayer = new OptionsLayer(json[["hydra:supportedProperties"]],json[["hydra:supportedOperations"]],json[["@context"]], json[["hydra:iriTemplate"]], item.name, item.url)
       setOptionsLayer(an_optionsLayer )
-      
     };
+    
     function closeHyperResourceDialog() {
       setIsOpen(false)
     }
     return (
       <div className={classes.root}>
         <List subheader={<ListSubheader>Url das camadas</ListSubheader>} className={classes.root} style={urlStyle}>
-          { props.items.map( item => (
-            <ListItem key={item.name}>
+          { props.items.map( (item, index) => (
+            <ListItem key={index}>
               <ListItemIcon>
                 <IconButton className={classes.iconButton} color="primary" aria-label="Info" onClick={(e) =>iconHandleClickInfo(e, item)}>
                     <Tooltip title="Informações da camada" aria-label="Add">

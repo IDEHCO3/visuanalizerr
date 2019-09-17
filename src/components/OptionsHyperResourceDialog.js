@@ -64,12 +64,13 @@ function HyperResourceDialog(props) {
         setUrlDeEntrada('')
         props.closeHyperResourceDialog()
         setItems([])
-
     };
+
     function closeHyperResourceDialog(event) {
       console.log(props.optionsLayer)
       props.closeHyperResourceDialog();
     };
+
     function handleChange() {};
     function urlChangeInputBase(event) {
         setUrlDeEntrada(event.target.value);
@@ -79,24 +80,26 @@ function HyperResourceDialog(props) {
       let id = headers.link.toUpperCase().indexOf('://schema.org/EntryPoint"'.toUpperCase())
       return id !== -1
     }
+
     function isNotEntryPoint(headers) {
        return !isEntryPoint(headers)
     }
+
     async function clickedSearchButton(e) {
-        console.log(urlDeEntrada);
-        if (!urlDeEntrada || urlDeEntrada.trim() === '')
-          return 
-        const result = await request(urlDeEntrada);
-        if (isNotEntryPoint(result.headers)) { 
-          let url_entrada = urlDeEntrada
-          handleClose()
-          props.clickSearchButtonDialog({name: url_entrada, url: url_entrada})
-          return
-        }
-        let json_entry_point = result.data;
-        let arr = [];
-        Object.entries(json_entry_point).forEach( ([key, value]) => { arr.push({key: key, value: value}); });
-        setItems(arr);
+      console.log(urlDeEntrada);
+      if (!urlDeEntrada || urlDeEntrada.trim() === '')
+        return 
+      const result = await request(urlDeEntrada);
+      if (isNotEntryPoint(result.headers)) { 
+        let url_entrada = urlDeEntrada
+        handleClose()
+        props.clickSearchButtonDialog({name: url_entrada, url: url_entrada})
+        return
+      }
+      let json_entry_point = result.data;
+      let arr = [];
+      Object.entries(json_entry_point).forEach( ([key, value]) => { arr.push({key: key, value: value}); });
+      setItems(arr);
     };
     
     return (
@@ -104,7 +107,7 @@ function HyperResourceDialog(props) {
         <Dialog open={props.isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
           <DialogTitle id="form-dialog-title">Escolha ou informe um URL </DialogTitle>
           <DialogContent>
-            <Select native value={''} onChange={handleChange}fullWidth>
+            <Select native value={''} onChange={handleChange} fullWidth>
               <option value="" />
               items.map(item =>
               <option value={'http://ggt-des.ibge.gov.br/api/bcim/'} >'ibge/bcim'</option>

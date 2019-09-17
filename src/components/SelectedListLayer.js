@@ -5,7 +5,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import Switch from '@material-ui/core/Switch';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -45,8 +44,8 @@ function ListLayer(props) {
   return (
     <div className={classes.root}>
       <List>
-        {props.layersResource.map(layer => (
-          <ListItem key={layer.name}>
+        {props.layersResource.map( ( layer, index) => (
+          <ListItem key={index}>
             <ListItemIcon>
               <IconButton className={classes.iconButton} value={layer} color="primary" aria-label="Info" onClick={(e) => iconHandleClickInfo(e, layer)}><InfoIcon /></IconButton>
             </ListItemIcon>

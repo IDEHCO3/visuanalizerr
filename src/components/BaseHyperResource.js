@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import { withStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import SearchIcon from '@material-ui/icons/Search';
@@ -11,30 +10,19 @@ import Grid from '@material-ui/core/Grid';
 import {request} from './../utils/requests';
 import {GeoHyperLayerResource, OptionsLayer} from './../utils/LayerResource';
 import ListLayer from './ListLayer';
+import { width } from '@material-ui/system';
 
-const styles = theme => ({
-    root: {
-      width: '100%',
-      maxWidth: 360,
-      backgroundColor: theme.palette.background.paper,
-    },  
-    formControl: {
-        margin: 10,
-        minWidth: 120,
-    },
-    selectEmpty: {
-        marginTop: 10,
-    },
-    textField: {
-      marginLeft: '10px',
-      marginRight: '10px',
-      width: '20px',
-    },
-  
- });
+const useStyles = makeStyles( theme => ({
+  buttonGroup: {
+    marginTop: "30px",
+  },
+  textField:{
+    width: "100%",
+  },
+ }));
 
-function BaseHyperResource(props) {
-  const classes = props;
+export default function BaseHyperResource(props) {
+  const classes = useStyles();
   const [select_url, setSelect_url ] = useState('');
   const [text_url, setText_url] =  useState('');
   const [items, setItems] = useState([]);
@@ -68,7 +56,7 @@ function BaseHyperResource(props) {
   };
   async function iconHandleClickSearch(e) {
     if (!text_url || text_url.trim() === '')
-          return 
+      return 
     
     const result = await request(text_url);
     let arr = [];
@@ -88,35 +76,35 @@ function BaseHyperResource(props) {
   }
   return (
     <div>
-      <FormControl className={classes.formControl}>
-        <Typography variant="h6">Urls de entrada </Typography>
-        <NativeSelect value={select_url} onChange={selectHandleChange} >
-          <option value=""/>
-          <option value="http://ggt-des.ibge.gov.br/api/bcim/">Base Cartográfica Contínua do Brasil ao Milionésimo-IBGE</option>
-          <option value="http://ggt-des.ibge.gov.br/api/osm-2017-06/">Base vetorial do OpenStreetMap de 2017-06</option>
-        </NativeSelect>
-        <Grid container spacing={2} >
-          <Grid item xs={10}>
-             <TextField  id="standard-name" label="Url"  className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"/>
-             <ButtonGroup variant="contained" color="default" aria-label="outlined primary button group">
-                <Tooltip title="Pesquisar camadas" aria-label="Add">
-                  <Button color="primary" className={classes.button} aria-label="Search" onClick={iconHandleClickSearch} >
-                    <SearchIcon/>
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Remover camadas" aria-label="Add">
-                  <Button color="primary" className={classes.button}  aria-label="Search" onClick={iconHandleClickHighlightOff}> 
-                    <HighlightOffIcon  color="error" /> 
-                  </Button>
-                </Tooltip>
-              </ButtonGroup>
-          </Grid>
-          
+      <Typography variant="h6">Urls de entrada </Typography>
+      <NativeSelect value={select_url} onChange={selectHandleChange} >
+        <option value=""/>
+        <option value="http://ggt-des.ibge.gov.br/api/bcim/">Base Cartográfica Contínua do Brasil ao Milionésimo-IBGE</option>
+        <option value="http://ggt-des.ibge.gov.br/api/osm-2017-06/">Base vetorial do OpenStreetMap de 2017-06</option>
+        <option value="http://ggt-des.ibge.gov.br/api/munic-2015/">Munic 2015</option>
+        <option value="http://ggt-des.ibge.gov.br/api/ibge/geografia/atlas/demografico/2010/">Atlas Demográfico 2010</option>
+        <option value="http://ggt-des.ibge.gov.br/api/ibge/recursos-naturais/cobertura-uso-terra/">CREN - Cobertura de terra</option>
+      </NativeSelect>
+      <Grid container spacing={2} >
+        <Grid item xs={8} >
+          <TextField label="Url" className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"/>
         </Grid>
-      </FormControl>
+        <Grid item xs={4} >
+          <ButtonGroup variant="contained" className={classes.buttonGroup}  color="default">
+            <Tooltip title="Pesquisar camadas" aria-label="Add">
+              <Button color="primary" aria-label="Search" onClick={iconHandleClickSearch} >
+                <SearchIcon />
+              </Button>
+            </Tooltip>
+            <Tooltip title="Remover camadas" aria-label="Add">
+              <Button color="primary" aria-label="Limpar" onClick={iconHandleClickHighlightOff}> 
+                <HighlightOffIcon  color="error" /> 
+              </Button>
+            </Tooltip>
+          </ButtonGroup>
+        </Grid>
+      </Grid>
       <ListLayer items={items} selectedItemName={selectedItemName}/>
     </div>
   );
 }
-
-export default withStyles(styles)(BaseHyperResource);
