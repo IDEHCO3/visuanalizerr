@@ -7,10 +7,9 @@ import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Button, NativeSelect, Tooltip } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import {request} from './../utils/requests';
-import {GeoHyperLayerResource, OptionsLayer} from './../utils/LayerResource';
+import { request } from './../utils/requests';
+import { GeoHyperLayerResource } from './../utils/LayerResource';
 import ListLayer from './ListLayer';
-import { width } from '@material-ui/system';
 
 const useStyles = makeStyles( theme => ({
   buttonGroup: {
@@ -23,7 +22,7 @@ const useStyles = makeStyles( theme => ({
 
 export default function BaseHyperResource(props) {
   const classes = useStyles();
-  const [select_url, setSelect_url ] = useState('');
+  const [select_url] = useState('');
   const [text_url, setText_url] =  useState('');
   const [items, setItems] = useState([]);
   

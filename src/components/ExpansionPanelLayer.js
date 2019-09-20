@@ -21,19 +21,19 @@ const styles = theme => ({
     padding: 10,
   }
 });
+
 async function clickedSearchButton(e, item) {
-    console.log(e);
-    console.log(item);
-  
+  console.log(e);
+  console.log(item);
 };
 
 function ExpansionPanelLayer(props) {
+
   const classes = props;
   const [expanded, setExpanded] = useState(false);
   const handleChange = panel => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
-
   
   return (
     <div className={classes.root}>

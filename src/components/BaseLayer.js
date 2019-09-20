@@ -29,20 +29,17 @@ function RadioButtonsGroup(props) {
   };
 
   return  (
-      
-      <div className={classes.root}>
-             
-                <RadioGroup aria-label="CamadaBase" name="camadaBase"  className={classes.group}  value={value}  onChange={handleChange}  defaultValue="OSM">
-                    <FormControlLabel value="OSM" control={<Radio />} label="OpenStreetMap" />
-                    <FormControlLabel value="google" control={<Radio />} label="Google Maps" />
-                    <FormControlLabel value="satelite" control={<Radio />} label="Satelite" />
-                    <FormControlLabel value="wikimedia" control={<Radio />} label="Wikimedia" />
-                    <FormControlLabel value="watercolor" control={<Radio />} label="Water Color" />
-                    <FormControlLabel value="" control={<Radio />} label="Nenhuma" />
-                    
-                </RadioGroup>
-        </div>
-    );
+    <div className={classes.root}>
+      <RadioGroup aria-label="CamadaBase" name="camadaBase"  className={classes.group}  value={value}  onChange={handleChange}  defaultValue="OSM">
+        <FormControlLabel value="OSM" control={<Radio />} label="OpenStreetMap" />
+        <FormControlLabel value="google" control={<Radio />} label="Google Maps" />
+        <FormControlLabel value="satelite" control={<Radio />} label="Satelite" />
+        <FormControlLabel value="wikimedia" control={<Radio />} label="Wikimedia" />
+        <FormControlLabel value="watercolor" control={<Radio />} label="Water Color" />
+        <FormControlLabel value="" control={<Radio />} label="Nenhuma" />
+      </RadioGroup>
+    </div>
+  );
   
 }
 
