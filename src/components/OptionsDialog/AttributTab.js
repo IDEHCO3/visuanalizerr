@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -18,14 +18,15 @@ const useStyles = makeStyles(theme => ({
 
 export default function InteractiveList(props) {
   const classes = useStyles();
-  const AsupportedProperties = props.layerAttributes.jsonOptions
-  const supportedProperties = [{'hydra:property': "aaaaa"}]
-  /*console.log("prop Prope ---")
-  console.log(AsupportedProperties)
-  console.log("---")*/
-  const context = props.layerAttributes['@context']
+  const { optionsLayer } = props
+  const [ supportedProperties, setSuportedProperties ] = useState([]) // [{'hydra:property': "aaaaa"}]
 
-  //console.log(props.layerAttributes)
+  useEffect(() => {
+    if(optionsLayer.jsonOptions){
+      setSuportedProperties(optionsLayer.supportedProperties)
+    }
+  }, [optionsLayer])
+
   return (
     <List dense={false}>
     { supportedProperties.map( (property, index) => (
@@ -34,10 +35,10 @@ export default function InteractiveList(props) {
         <ListItemText primary={property["hydra:property"]} />
 
         <ListItemSecondaryAction>
-          <Button variant="contained" color="primary" className={classes.button} >
+          <Button variant="contained" color="primary" className={classes.button} href={property["contextType"]} target="blank">
             Tipo <LaunchIcon className={classes.rightIcon}/>
           </Button>
-          <Button variant="contained" color="primary" className={classes.button} href="aaaaaa" target="blank">
+          <Button variant="contained" color="primary" className={classes.button} href={property["contextId"]} target="blank">
             Semantica <LaunchIcon  className={classes.rightIcon}/>
           </Button>
         </ListItemSecondaryAction>

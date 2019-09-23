@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { IconButton, Box, Paper } from '@material-ui/core';
@@ -12,10 +12,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 import Attribut from './AttributTab'
-
-import axios from 'axios';
-import { request } from '../../utils/requests';
-import { OptionsLayer } from '../../utils/LayerResource';
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -59,13 +55,15 @@ TabPanel.propTypes = {
 
 export default function OptionsDialog(props) {
   const classes = useStyles();
-  const [ optionsLayer, setOptionsLayer ] = useState(new OptionsLayer()); //go horse
   const [ value, setValue ] = React.useState(0); // index of the tab
   const { layer, isOpen } = props;
-  
-  useEffect(() => {
-   console.log(layer)
-  }, [isOpen,layer])
+
+  /*useEffect( () => 
+    {
+      console.log("layer")
+      console.log(layer)
+    }
+  ,[layer])*/
 
   function handleTabChange(event, newValue) {
     setValue(newValue);
@@ -78,7 +76,7 @@ export default function OptionsDialog(props) {
   
   return (
     <div>
-      <Dialog fullScreen open={props.isOpen} onClose={handleClose} TransitionComponent={Transition}>
+      <Dialog fullScreen open={isOpen} onClose={handleClose} TransitionComponent={Transition}>
         <AppBar className={classes.appBar}>
           <Toolbar>
             <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
@@ -106,7 +104,7 @@ export default function OptionsDialog(props) {
         </AppBar>
 
         <TabPanel value={value} index={0}>
-          <Attribut layerAttributes={optionsLayer}/>
+          <Attribut optionsLayer={layer}/>
         </TabPanel>
         <TabPanel value={value} index={1}>
           BBBB

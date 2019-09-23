@@ -47,8 +47,6 @@ export default function ListLayer(props) {
     const response = await request(layer.url, axios.options)
     const json = response.data
     let an_optionsLayer = new OptionsLayer(json, layer.url)
-    console.log("Resposta da requisição")
-    console.log(an_optionsLayer)
     setOptionsLayer(an_optionsLayer)
   }
 
