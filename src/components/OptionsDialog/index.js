@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { IconButton, Box, Paper } from '@material-ui/core';
@@ -11,7 +11,8 @@ import Slide from '@material-ui/core/Slide';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-import Attribut from './AttributTab'
+import AttributTab from './AttributTab'
+import OperationTab from './OperationTab'
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -83,7 +84,7 @@ export default function OptionsDialog(props) {
               <ArrowBackIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}>
-              Opções da camada - {layer.name} 
+              Opções da camada - {layer.iri}
             </Typography>
           </Toolbar>
 
@@ -104,10 +105,10 @@ export default function OptionsDialog(props) {
         </AppBar>
 
         <TabPanel value={value} index={0}>
-          <Attribut optionsLayer={layer}/>
+          <AttributTab optionsLayer={layer}/>
         </TabPanel>
         <TabPanel value={value} index={1}>
-          BBBB
+          <OperationTab optionsLayer={layer}/>
         </TabPanel>
         <TabPanel value={value} index={2}>
           CCCC

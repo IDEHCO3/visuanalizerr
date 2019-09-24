@@ -13,6 +13,7 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import LayersIcon from '@material-ui/icons/Layers';
+
 import BaseLayer from './components/BaseLayer';
 import BaseHyperResource from './components/BaseHyperResource';
 import BaseWMS from './components/BaseWMS';
