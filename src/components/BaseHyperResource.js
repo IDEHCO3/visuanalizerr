@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { Button, NativeSelect, Tooltip } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
+import { Tooltip } from '@material-ui/core';
 import { request } from './../utils/requests';
 import { GeoHyperLayerResource } from './../utils/LayerResource';
 import ListLayer from './ListLayer';
+
+import { InputLabel, MenuItem, FormControl, Select } from '@material-ui/core'; //Select Components
+import { Paper, InputBase, Divider, IconButton } from '@material-ui/core'; // Text input components
 
 const useStyles = makeStyles( theme => ({
   buttonGroup: {
@@ -18,12 +18,33 @@ const useStyles = makeStyles( theme => ({
   textField:{
     width: "100%",
   },
+  root: {
+    marginTop: '10px',
+    marginBottom: '10px',
+    padding: '2px 4px',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: "100%",
+  },
+  input: {
+    marginLeft: theme.spacing(1),
+    flex: 1,
+  },
+  iconButton: {
+    padding: 10,
+  },
+  divider: {
+    height: 28,
+    margin: 4,
+  },
  }));
 
 export default function BaseHyperResource(props) {
   const classes = useStyles();
-  const [select_url] = useState('');
-  const [text_url, setText_url] =  useState('');
+  const [text_url, setText_url] =  useState(''); 
   const [items, setItems] = useState([]);
   
   function isEntryPoint(headers) {
@@ -32,7 +53,6 @@ export default function BaseHyperResource(props) {
   };
   
   function selectedItemName(item_name, isImage) {
-    
     let an_item = null
     items.forEach((item, index) => {
       //console.log("nome do array: ",item.name, "nome passado:", item_name) 
@@ -46,13 +66,14 @@ export default function BaseHyperResource(props) {
     }
   };
 
-  function selectHandleChange(e) {
-    textHandleChange(e)
+  const selectHandleChange = event => {
+    setText_url(event.target.value);
   };
+
   function textHandleChange(e) {
-    
     setText_url(e.target.value)
   };
+
   async function iconHandleClickSearch(e) {
     if (!text_url || text_url.trim() === '')
       return 
@@ -70,39 +91,52 @@ export default function BaseHyperResource(props) {
     }
     setItems(arr);
   }
+
   function iconHandleClickHighlightOff() {
     setItems([]);
   }
+
   return (
     <div>
       <Typography variant="h6">Urls de entrada </Typography>
-      <NativeSelect value={select_url} onChange={selectHandleChange} >
-        <option value=""/>
-        <option value="http://ggt-des.ibge.gov.br/api/bcim/">Base Cartográfica Contínua do Brasil ao Milionésimo-IBGE</option>
-        <option value="http://ggt-des.ibge.gov.br/api/osm-2017-06/">Base vetorial do OpenStreetMap de 2017-06</option>
-        <option value="http://ggt-des.ibge.gov.br/api/munic-2015/">Munic 2015</option>
-        <option value="http://ggt-des.ibge.gov.br/api/ibge/geografia/atlas/demografico/2010/">Atlas Demográfico 2010</option>
-        <option value="http://ggt-des.ibge.gov.br/api/ibge/recursos-naturais/cobertura-uso-terra/">CREN - Cobertura de terra</option>
-      </NativeSelect>
-      <Grid container spacing={2} >
-        <Grid item xs={8} >
-          <TextField label="Url" className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"/>
-        </Grid>
-        <Grid item xs={4} >
-          <ButtonGroup variant="contained" className={classes.buttonGroup}  color="default">
-            <Tooltip title="Pesquisar camadas" aria-label="Add">
-              <Button color="primary" aria-label="Search" onClick={iconHandleClickSearch} >
-                <SearchIcon />
-              </Button>
-            </Tooltip>
-            <Tooltip title="Remover camadas" aria-label="Add">
-              <Button color="primary" aria-label="Limpar" onClick={iconHandleClickHighlightOff}> 
-                <HighlightOffIcon  color="error" /> 
-              </Button>
-            </Tooltip>
-          </ButtonGroup>
-        </Grid>
-      </Grid>
+      <FormControl className={classes.formControl}>
+        <InputLabel htmlFor="age-simple">APIs Pré Definidas</InputLabel>
+        <Select
+          value={text_url}
+          onChange={selectHandleChange}
+          name='Api'
+          autoWidth
+        >
+          <MenuItem value={""}></MenuItem>
+          <MenuItem value={"http://ggt-des.ibge.gov.br/api/bcim/"}>Base Cartográfica Contínua do Brasil ao Milionésimo-IBGE</MenuItem>
+          <MenuItem value={"http://ggt-des.ibge.gov.br/api/osm-2017-06/"}>Base vetorial do OpenStreetMap de 2017-06</MenuItem>
+          <MenuItem value={"http://ggt-des.ibge.gov.br/api/munic-2015/"}>Munic 2015</MenuItem>
+          <MenuItem value={"http://ggt-des.ibge.gov.br/api/ibge/geografia/atlas/demografico/2010/"}>Atlas Demográfico 2010</MenuItem>
+          <MenuItem value={"http://ggt-des.ibge.gov.br/api/ibge/recursos-naturais/cobertura-uso-terra/"}>CREN - Cobertura de terra</MenuItem>
+        </Select>
+      </FormControl>
+
+      <Paper className={classes.root}>
+        <InputBase
+          className={classes.input}
+          placeholder="Insira a URL da camada"
+          inputProps={{ 'aria-label': 'Insira a URL da camada' }}
+          value={text_url} 
+          onChange={textHandleChange}
+        />
+        <Tooltip title="Pesquisar camadas" aria-label="Add">
+          <IconButton className={classes.iconButton} aria-label="Buscar" onClick={iconHandleClickSearch}>
+            <SearchIcon />
+          </IconButton>  
+        </Tooltip>
+        <Divider className={classes.divider} orientation="vertical" />
+        <Tooltip title="Remover camadas" aria-label="Add">
+          <IconButton className={classes.iconButton} aria-label="directions" onClick={iconHandleClickHighlightOff}>
+            <HighlightOffIcon  color="error" /> 
+          </IconButton>
+        </Tooltip>      
+      </Paper>
+      
       <ListLayer items={items} selectedItemName={selectedItemName}/>
     </div>
   );

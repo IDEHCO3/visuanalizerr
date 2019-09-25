@@ -135,13 +135,13 @@ function App(props) {
         const response = await request(a_GeoHyperLayerResource.iri);
         const headers = response.headers
         const style_iri = styleFromHeaders(headers)
-        console.log(style_iri)
+        //console.log(style_iri)
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
         a_GeoHyperLayerResource.layer = vector_layer_ol
         let arr = layersResource.concat([a_GeoHyperLayerResource]) 
         setLayersResource(arr)
         a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-        console.log(layersResource)
+        //console.log(layersResource)
       }  
       
     };
@@ -176,19 +176,37 @@ function App(props) {
               <Divider /> 
               <div>
                 <ExpansionPanel>
-                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}><LayersIcon className={classes.icon } color="disabled"/><Typography > Camada Base</Typography></ExpansionPanelSummary>
-                  <ExpansionPanelDetails><BaseLayer baseLayerChanged={baseLayerChanged} /></ExpansionPanelDetails>
+                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} >
+                    <LayersIcon className={classes.icon } color="disabled"/>
+                    <Typography > Camada Base </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <BaseLayer baseLayerChanged={baseLayerChanged} />
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <ExpansionPanel expanded={true}>
+                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                    <LayersIcon className={classes.icon } color="primary"/>
+                    <Typography > API Hipercamadas </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <BaseHyperResource addLayerFromHyperResource = {addLayerFromHyperResource}/>
+                  </ExpansionPanelDetails>
                 </ExpansionPanel>
                 <ExpansionPanel>
-                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}><LayersIcon className={classes.icon } color="primary"/><Typography > API Hipercamadas</Typography></ExpansionPanelSummary>
-                  <ExpansionPanelDetails><BaseHyperResource addLayerFromHyperResource = {addLayerFromHyperResource}/></ExpansionPanelDetails>
+                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                  <LayersIcon className={classes.icon } color="secondary"/>
+                  <Typography > Geo serviços WMS </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <BaseWMS facadeOL={facadeOL} addLayerFromWMS={addLayerFromWMS}/>
+                  </ExpansionPanelDetails>
                 </ExpansionPanel>
                 <ExpansionPanel>
-                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}><LayersIcon className={classes.icon } color="secondary"/><Typography > Geo serviços WMS</Typography></ExpansionPanelSummary>
-                  <ExpansionPanelDetails><BaseWMS facadeOL={facadeOL} addLayerFromWMS={addLayerFromWMS}/></ExpansionPanelDetails>
-                </ExpansionPanel>
-                <ExpansionPanel>
-                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}><LayersIcon className={classes.icon } color="inherit" /><Typography > Camadas selecionadas</Typography></ExpansionPanelSummary>
+                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                    <LayersIcon className={classes.icon } color="inherit" />
+                    <Typography > Camadas selecionadas </Typography>
+                  </ExpansionPanelSummary>
                   <ExpansionPanelDetails>  
                     <SelectedListLayer 
                       layersResource={layersResource} 
