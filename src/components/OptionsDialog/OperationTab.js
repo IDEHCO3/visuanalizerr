@@ -147,13 +147,7 @@ export default function InteractiveList(props) {
                   </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row"> Exemplo: </TableCell>
-                    <TableCell align="right">{ optionsLayer.iri }/{ operation["hydra:operation"] }/
-                      { operation['hydra:expects'].map( (item, index) => ( 
-                        <span key={index}>
-                          {item.parameter}/
-                        </span>
-                      ))}
-                      </TableCell>
+                    <TableCell align="right"> BUSCAR DA API  </TableCell>
                   </TableRow>
               </TableBody>
             </Table>
