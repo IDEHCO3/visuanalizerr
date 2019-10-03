@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
@@ -10,6 +10,8 @@ import TextField from '@material-ui/core/TextField';
 import SearchIcon from '@material-ui/icons/Search';
 import SamountIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
+import AddIcon from '@material-ui/icons/Add';
+import { green, red } from '@material-ui/core/colors';
 
 import { request } from '../../utils/requests';
 
@@ -35,6 +37,26 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const GreenButton = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[500]),
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+  },
+}))(Fab);
+
+const RedButton = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    '&:hover': {
+      backgroundColor: red[700],
+    },
+  },
+}))(Fab);
+
 export default function RequestTab(props) {
   const classes = useStyles();
   const { optionsLayer } = props
@@ -55,7 +77,7 @@ export default function RequestTab(props) {
 
   useEffect(() => {
 
-    function setUrlOnUriListChange() { //transform the array of uri in a url (string)
+    function setExpressionUrlOnUriListChange() { //transform the array of uri in a url (string)
       const uris = uriList.map(
         operation => {
           let expression = ''
@@ -73,7 +95,7 @@ export default function RequestTab(props) {
       return optionsLayer.iri + uris
     }
 
-    setUrlOnUriListChange()
+    setExpressionUrlOnUriListChange()
   },[uriList,optionsLayer.iri])
 
   function hasOperator (uris) {
@@ -84,11 +106,15 @@ export default function RequestTab(props) {
     if (hasOperator(uriList).length) {
       const uri = uriList.find(item => item.value.includes('{operator}'))
       const uriIndex = uriList.indexOf(uri)
-      const newValue = uriList.value.replace(/{operator}/, value)
-      uriList[uriIndex].value = newValue
+      const newValue = uri.value.replace(/{operator}/, value)
+      let temporaryUriList = uriList.slice(0)
+      temporaryUriList[uriIndex].value = newValue
+      setUriList(temporaryUriList)
 
     } else {
-      uriList.push({value})
+      let temporaryUriList = uriList.slice(0)
+      temporaryUriList.push({value})
+      setUriList(temporaryUriList)
     }
   }
 
@@ -123,6 +149,24 @@ export default function RequestTab(props) {
 
     setAttributeSamples(parsedResponse)
     
+  }
+
+  function includeAttribute(attribute){
+    const uri = uriList.find(item => item.value.includes('{attribute}'))
+    const uriIndex = uriList.indexOf(uri)
+    const newValue = uri.value.replace(/{attribute}/, attribute)
+    let temporaryUriList = uriList.slice(0)
+    temporaryUriList[uriIndex].value = newValue
+    setUriList(temporaryUriList)
+  }
+
+  function includeValue(value){
+    const uri = uriList.find(item => item.value.includes('{value}'))
+    const uriIndex = uriList.indexOf(uri)
+    const newValue = uri.value.replace(/{value}/, value)
+    let temporaryUriList = uriList.slice(0)
+    temporaryUriList[uriIndex].value = newValue
+    setUriList(temporaryUriList)
   }
 
   function filterExpects(expects) {
@@ -193,11 +237,20 @@ export default function RequestTab(props) {
                   <ListItemText primary={property["hydra:property"]} />
 
                   <ListItemSecondaryAction>
-                    <Tooltip title="Buscar amostras">
-                      <Fab size="small" color="secondary" aria-label="add" className={classes.margin} onClick={() => showAttribute(property["hydra:property"])}>
-                        <SearchIcon />
-                      </Fab>
-                    </Tooltip>
+                    { expressionUrl.includes('{attribute}') ?
+                      <Tooltip title="Adicionar atributo na expressão">
+                        <GreenButton size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => includeAttribute(property["hydra:property"])}>
+                          <AddIcon />
+                        </GreenButton>
+                      </Tooltip>
+                    : 
+                      <Tooltip title="Buscar amostras">
+                        <Fab size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => showAttribute(property["hydra:property"])}>
+                          <SearchIcon />
+                        </Fab>
+                      </Tooltip>
+                    }
+                    
                   </ListItemSecondaryAction>
                 </ListItem>
               ))}
@@ -227,6 +280,18 @@ export default function RequestTab(props) {
               { attributeSamples.map( (item, index) => (
                 <ListItem button key={index}>
                   <ListItemText primary={ attributeSearchRange.start + index + ' - ' + item }/>
+                  <ListItemSecondaryAction>
+                    { expressionUrl.includes('{value}') ?
+                      <Tooltip title="Adicionar valor na expressão">
+                        <GreenButton size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => includeValue(item)}>
+                          <AddIcon />
+                        </GreenButton>
+                      </Tooltip>
+                    : 
+                      <div></div>
+                    }
+                    
+                  </ListItemSecondaryAction>
                 </ListItem>
               ))}
               </List>
@@ -247,7 +312,7 @@ export default function RequestTab(props) {
 
                   <ListItemSecondaryAction>
                     <Tooltip title="Adicionar operação">
-                      <Fab size="small" color="secondary" aria-label="add" className={classes.margin} onClick={() => handleAddOperation(operation)}>
+                      <Fab size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => handleAddOperation(operation)}>
                         <SamountIcon />
                       </Fab>
                     </Tooltip>
@@ -269,9 +334,9 @@ export default function RequestTab(props) {
 
                   <ListItemSecondaryAction>
                     <Tooltip title="Remover operação">
-                      <Fab size="small" color="secondary" aria-label="remove" className={classes.margin} onClick={() => handleRemoveOperation(SeletedOperation)}>
+                      <RedButton size="small" color="primary" aria-label="remove" className={classes.margin} onClick={() => handleRemoveOperation(SeletedOperation)}>
                         <ClearIcon />
-                      </Fab>
+                      </RedButton>
                     </Tooltip>
                   </ListItemSecondaryAction>
                 </ListItem>
@@ -284,29 +349,34 @@ export default function RequestTab(props) {
 
         <Grid container item xs={12} spacing={3}>
           <Grid item xs={12}>
-            <ButtonGroup
+            { expressionUrl.includes('{operator}') ? 
+              <ButtonGroup
               variant="contained"
               color="primary"
               aria-label="full-width contained primary button group"
               size="large"
               fullWidth
-            >
-              <Button onClick={() => includeOperator('eq')}> = </Button>
-              <Button onClick={() => includeOperator('neq')}> != </Button>
-              <Button onClick={() => includeOperator('gt')}> > </Button>
-              <Button onClick={() => includeOperator('lt')}> {'<'} </Button>
-              <Button onClick={() => includeOperator('gte')}> >= </Button>
-              <Button onClick={() => includeOperator('lte')}> {'<='} </Button>
-              <Button onClick={() => includeOperator('between')}> between </Button>
-              <Button onClick={() => includeOperator('isnull')}> null </Button>
-              <Button onClick={() => includeOperator('isnotnull')}> not null </Button>
-              <Button onClick={() => includeOperator('like')}> like </Button>
-              <Button onClick={() => includeOperator('notlike')}> not like </Button>
-              <Button onClick={() => includeOperator('in')}> in </Button>
-              <Button onClick={() => includeOperator('notin')}> not in </Button>
-              <Button onClick={() => includeOperator('and')}> and </Button>
-              <Button onClick={() => includeOperator('or')}> or </Button>
-            </ButtonGroup>
+              >
+                <Button onClick={() => includeOperator('eq')}> = </Button>
+                <Button onClick={() => includeOperator('neq')}> != </Button>
+                <Button onClick={() => includeOperator('gt')}> > </Button>
+                <Button onClick={() => includeOperator('lt')}> {'<'} </Button>
+                <Button onClick={() => includeOperator('gte')}> >= </Button>
+                <Button onClick={() => includeOperator('lte')}> {'<='} </Button>
+                <Button onClick={() => includeOperator('between')}> between </Button>
+                <Button onClick={() => includeOperator('isnull')}> null </Button>
+                <Button onClick={() => includeOperator('isnotnull')}> not null </Button>
+                <Button onClick={() => includeOperator('like')}> like </Button>
+                <Button onClick={() => includeOperator('notlike')}> not like </Button>
+                <Button onClick={() => includeOperator('in')}> in </Button>
+                <Button onClick={() => includeOperator('notin')}> not in </Button>
+                <Button onClick={() => includeOperator('and')}> and </Button>
+                <Button onClick={() => includeOperator('or')}> or </Button>
+              </ButtonGroup> 
+            :
+              <div></div>
+            }
+            
           </Grid>
 
           <Grid item xs={12} className={classes.urlContainer}>
