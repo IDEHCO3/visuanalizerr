@@ -62,7 +62,7 @@ export default function BaseHyperResource(props) {
           
     })
     if (an_item) {
-      props.addLayerFromHyperResource(new GeoHyperLayerResource(null, an_item.url, an_item.name, null, null ,isImage ))
+      props.addLayerFromHyperResource(new GeoHyperLayerResource(null, an_item.url, an_item.name, null, null, isImage ))
     }
   };
 
@@ -137,7 +137,7 @@ export default function BaseHyperResource(props) {
         </Tooltip>      
       </Paper>
       
-      <ListLayer items={items} selectedItemName={selectedItemName}/>
+      <ListLayer items={items} selectedItemName={selectedItemName} addLayerFromHyperResource={props.addLayerFromHyperResource}/>
     </div>
   );
 }

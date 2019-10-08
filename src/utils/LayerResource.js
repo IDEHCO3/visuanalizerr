@@ -101,8 +101,8 @@ export class GeoHyperLayerResource extends AbstractLayerResource {
     this.iri_metadata =  iri_metadata
     this.is_image = is_image
   }
-  
 }
+
 //This class adresses the Layer in the GetCapabilities from WMS
 export class WMSCapabilityLayer extends AbstractLayerResource {
 

@@ -7,12 +7,14 @@ import { ButtonGroup, Button, Fab, Tooltip  } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 
+import Icon from '@material-ui/core/Icon';
 import SearchIcon from '@material-ui/icons/Search';
 import SamountIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import AddIcon from '@material-ui/icons/Add';
 import { green, red } from '@material-ui/core/colors';
 
+import { GeoHyperLayerResource } from '../../utils/LayerResource';
 import { request } from '../../utils/requests';
 
 const useStyles = makeStyles(theme => ({
@@ -29,8 +31,8 @@ const useStyles = makeStyles(theme => ({
   button: {
     margin: theme.spacing(1),
   },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
+  marginRight: {
+    marginRight: theme.spacing(1),
   },
   urlContainer: {
     textAlign: 'center',
@@ -66,6 +68,7 @@ export default function RequestTab(props) {
   const [ attributeSamples, setAttributeSamples ] = useState([])
   const [ uriList, setUriList ] = useState([]) // array of objects [{name: 'bbcontains', value: '{geometry}'}]
   const [ expressionUrl, setExpressionUrl ] = useState('')
+  const [ isImage, setIsImage ] = useState(false)
 
   useEffect(() => {
     if(optionsLayer.jsonOptions){
@@ -222,6 +225,16 @@ export default function RequestTab(props) {
     setExpressionUrl(e.target.value)
   }
 
+  function handleClickImageOrVector() {
+    setIsImage(!isImage) 
+    //item.isImage = !item.isImage
+  }
+
+  function handleClickAddLayer() {
+    props.addLayerFromHyperResource(new GeoHyperLayerResource(null, expressionUrl, expressionUrl, null, null, isImage))
+    props.closeDialog()
+  };
+
   return (
     <div className={classes.root}>
       <Grid container spacing={1}>
@@ -279,7 +292,7 @@ export default function RequestTab(props) {
               <List dense={false}>
               { attributeSamples.map( (item, index) => (
                 <ListItem button key={index}>
-                  <ListItemText primary={ attributeSearchRange.start + index + ' - ' + item }/>
+                  <ListItemText primary={ index + 1 + ' - ' + item }/>
                   <ListItemSecondaryAction>
                     { expressionUrl.includes('{value}') ?
                       <Tooltip title="Adicionar valor na expressão">
@@ -353,7 +366,7 @@ export default function RequestTab(props) {
               <ButtonGroup
               variant="contained"
               color="primary"
-              aria-label="full-width contained primary button group"
+              aria-label="operadores"
               size="large"
               fullWidth
               >
@@ -388,8 +401,37 @@ export default function RequestTab(props) {
               variant="outlined"
               fullWidth
             /> 
-            <Button variant="contained" className={classes.button} color="primary" onClick={handleClearUri}> Limpar </Button>
-            <Button variant="contained" className={classes.button} color="primary" onClick={(e) => console.log(e)}> Buscar </Button>
+            
+            <ButtonGroup 
+              variant="contained"
+              color="primary"
+              aria-label="operadores"
+              size="large"
+              fullWidth
+            >
+                <Button variant="contained" color="primary" onClick={handleClearUri}> 
+                  <Icon className={classes.marginRight}>layers_clear</Icon>
+                  Limpar Expressão 
+                </Button>
+                
+                { isImage ? 
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickImageOrVector()}>
+                    <Icon className={classes.marginRight}>image</Icon>
+                    Tipo da Camada: Imagem
+                  </Button>
+                  : 
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickImageOrVector()}>
+                    <Icon className={classes.marginRight}>grain</Icon>
+                    Tipo da Camada: Vetor
+                  </Button>
+                }
+                
+                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickAddLayer()}>  
+                  <Icon className={classes.marginRight}>queue</Icon> 
+                  Adicionar camada 
+                </Button>
+                
+            </ButtonGroup>
           </Grid>         
         </Grid>
       </Grid>
