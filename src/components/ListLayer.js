@@ -23,17 +23,16 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function ListLayer(props) {
-
   const classes = useStyles();
   const [ isImageCopy, setIsImageCopy ] = useState(false);
   const [ optionsDialogIsOpen, setOptionsDialogIsOpen ] = useState(false);
   const [ optionsLayer, setOptionsLayer ] = useState(new OptionsLayer());
   
-  function handleClickAddLayer(event, item) {
+  function handleClickAddLayer(item) {
     props.selectedItemName(item.name, item.isImage)
   };
 
-  function handleClickImageOrVector(event, item) {
+  function handleClickImageOrVector(item) {
     setIsImageCopy(!isImageCopy) // change this later, just to re render
     item.isImage = !item.isImage
   }; 
@@ -69,7 +68,7 @@ export default function ListLayer(props) {
             <ListItemText  primary={item.name} />
             <ListItemSecondaryAction>
               <ButtonGroup color="primary" aria-label="outlined primary button group">
-                <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickImageOrVector(e, item)}>
+                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickImageOrVector(item)}>
                   { item.isImage ? 
                     <Tooltip title="Tipo da Camada: Imagem" aria-label="Add">
                       <Icon>image</Icon>
@@ -81,14 +80,14 @@ export default function ListLayer(props) {
                   }
                 </Button>
                 <Tooltip title="Adicionar camada" aria-label="Add">
-                  <Button variant="contained" color="primary" className={classes.Button} onClick={(e) => handleClickAddLayer(e, item)}> <Icon>queue</Icon> </Button>
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickAddLayer(item)}> <Icon>queue</Icon> </Button>
                 </Tooltip>
               </ButtonGroup>
             </ListItemSecondaryAction>
           </ListItem>
         ))}  
       </List>
-      <OptionsDialog layer={optionsLayer} isOpen={optionsDialogIsOpen} close={closeOptionsDialog} />
+      <OptionsDialog layer={optionsLayer} isOpen={optionsDialogIsOpen} close={closeOptionsDialog} addLayerFromHyperResource={props.addLayerFromHyperResource}/>
     </div>
   );
 }

@@ -13,6 +13,8 @@ import Tab from '@material-ui/core/Tab';
 
 import AttributTab from './AttributTab'
 import OperationTab from './OperationTab'
+import RequestTab from './RequestTab'
+import JoinClientTab from './JoinClientTab'
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -111,10 +113,10 @@ export default function OptionsDialog(props) {
           <OperationTab optionsLayer={layer}/>
         </TabPanel>
         <TabPanel value={value} index={2}>
-          CCCC
+          <RequestTab optionsLayer={layer} closeDialog={props.close} addLayerFromHyperResource={props.addLayerFromHyperResource}/>
         </TabPanel>
         <TabPanel value={value} index={3}>
-          DDDD
+          <JoinClientTab optionsLayer={layer}/>
         </TabPanel>
 
       </Dialog>

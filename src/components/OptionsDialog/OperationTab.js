@@ -10,6 +10,11 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
+
+import Tooltip from '@material-ui/core/Tooltip';
+
+import LaunchIcon from '@material-ui/icons/Launch';
 
 const ExpansionPanel = withStyles({
   root: {
@@ -82,15 +87,18 @@ export default function InteractiveList(props) {
     setExpanded(newExpanded ? panel : false);
   };
     
-  function parametersToString (parameterList) {
+  function parametersMap (parameterList) {
     //console.log(parameterList)
     if (parameterList.length === 0){
       return ''
     } else {
      return parameterList.map( (item, index) => (
-        <div key={index}>
-          <a href={item.parameter}>{item.parameter}</a>
-        </div>
+      <Tooltip title="Abrir definição em nova aba" key={index}>
+        <Button variant="outlined" color="primary" className={classes.button} href={item.parameter} target="new"> 
+          {transformDefinitionUrlInName(item.parameter)}
+          <LaunchIcon/>
+        </Button>
+      </Tooltip>
       ));
     }
   
@@ -101,6 +109,13 @@ export default function InteractiveList(props) {
       setSupportedOperations(optionsLayer.supportedOperations)
     }
   }, [optionsLayer])
+
+  function transformDefinitionUrlInName(expects) {
+    if (expects.includes('schema'))
+      return expects.split('/').reverse()[0]
+    else
+      return expects.split('#').reverse()[0]
+  }
 
   return (
     <div>
@@ -126,34 +141,34 @@ export default function InteractiveList(props) {
                   <TableRow>
                     <TableCell component="th" scope="row"> Semantica: </TableCell>
                     <TableCell align="right">
-                      <a href={ operation["@id"]} target="new"> 
-                        {operation["@id"]}
-                      </a>
+                      <Tooltip title="Abrir definição em nova aba">
+                        <a href={ operation["@id"]} target="new"> 
+                          {operation["@id"]}
+                        </a>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row"> Retorno da operação: </TableCell>
                     <TableCell align="right">
-                      <a href={ operation["hydra:returns"]} target="new"> 
-                        {operation["hydra:returns"]}
-                      </a>
+                      
+                      <Tooltip title="Abrir definição em nova aba">
+                        <Button variant="outlined" color="primary" className={classes.button} href={ operation["hydra:returns"]} target="new"> 
+                          {transformDefinitionUrlInName(operation["hydra:returns"])}
+                          <LaunchIcon/>
+                        </Button>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row"> Parametros: </TableCell>
-                      <TableCell align="right" key={index}>
-                       { parametersToString(operation['hydra:expects'])}
+                      <TableCell align="right" >
+                       { parametersMap(operation['hydra:expects'])}
                       </TableCell> 
                   </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row"> Exemplo: </TableCell>
-                    <TableCell align="right">{ optionsLayer.iri }/{ operation["hydra:operation"] }/
-                      { operation['hydra:expects'].map( (item, index) => ( 
-                        <span key={index}>
-                          {item.parameter}/
-                        </span>
-                      ))}
-                      </TableCell>
+                    <TableCell align="right"> BUSCAR DA API  </TableCell>
                   </TableRow>
               </TableBody>
             </Table>

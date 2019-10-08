@@ -18,6 +18,7 @@ import GeoJSON from 'ol/format/GeoJSON'
 import { WMSCapabilityLayer} from './LayerResource'
 import axios from 'axios';
 import {request} from './requests';
+
 export class FacadeOL {
     constructor(id_map='map', coordinates_center=[-4331024.58685793, -1976355.8033415168], a_zoom_value = 4, a_baseLayer_name='OSM' ) {
       this.map = new Map({ target: id_map});
@@ -118,27 +119,29 @@ export class FacadeOL {
      //End -Affordances
     // Begin - events
     displayFeatureInfo(evt, feature, layer) {
-        let prettyCoord = toStringHDMS(transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'), 2);
-                
-        if (feature) {
-          let str = ''
-          const entries = Object.entries(feature.values_)  
-          entries.forEach(entry => {
-            let key = entry[0];
-            let value = entry[1];
-            console.log(typeof value)
+      let prettyCoord = toStringHDMS(transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'), 2);
+              
+      if (feature) {
+        let str = ''
+        const entries = Object.entries(feature.values_)  
+        
+        entries.forEach(entry => {
+          let key = entry[0];
+          let value = entry[1];
+          if(typeof(value) === 'string'){
+            str += '<p>' + key + ': ' + value + '</p>'    
+          }
 
-          })
-          entries.forEach(entry => {
-            let key = entry[0];
-            let value = entry[1];
-            if ((typeof key) != 'geometry' && (typeof value != 'object'))
-              str += '<p>' + key + ': ' + value + '</p>'    
-          })
-          
-          this.popup.show(evt.coordinate, '<div><h2>Coordinates</h2><p>' + prettyCoord + '</p>' + str+ '</div>')
-        } else
-          this.popup.show(evt.coordinate, '<div><h2>Coordinates</h2><p>' + prettyCoord + '</p></div>')
+          /*
+          console.log(key,': ',value,typeof(value))
+          if ((typeof key) != 'geometry' && (typeof value != 'object'))
+            str += '<p>' + key + ': ' + value + '</p>'    
+          */
+        })
+        
+        this.popup.show(evt.coordinate, '<div><h2>Coordinates</h2><p>' + prettyCoord + '</p>' + str + '</div>')
+      } else
+        this.popup.show(evt.coordinate, '<div><h2>Coordinates</h2><p>' + prettyCoord + '</p></div>')
 
     }
 
