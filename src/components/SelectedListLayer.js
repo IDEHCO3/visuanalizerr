@@ -9,8 +9,10 @@ import Switch from '@material-ui/core/Switch';
 import Icon from '@material-ui/core/Icon';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 
 import OptionsDialog from './OptionsDialog'
+import ClientJoinDialog from './ClientJoinDialog'
 import axios from 'axios';
 import { request } from '../utils/requests';
 import { OptionsLayer } from '../utils/LayerResource';
@@ -30,15 +32,11 @@ const styles = theme => ({
 function ListLayer(props) {
   const classes = props;
   const [ optionsDialogIsOpen, setOptionsDialogIsOpen ] = useState(false);
+  const [ clientJoinDialogIsOpen, setClientJoinDialogIsOpen ] = useState(false);
   const [ optionsLayer, setOptionsLayer ] = useState(new OptionsLayer());
 
   function switchHandleChange(event, is_ckecked) {  
     props.switchSelectedLayerResource(event.target.value, is_ckecked)
-  };
-
-  function handleClickOptionDialog(item) { 
-    requestOptionsLayerInfo(item)
-    setOptionsDialogIsOpen(true)
   };
 
   async function requestOptionsLayerInfo(layer) {
@@ -48,7 +46,21 @@ function ListLayer(props) {
     setOptionsLayer(an_optionsLayer)
   }
 
-  function closeOptionsDialog () {
+  function handleClickClientJoinDialog(item) { 
+    requestOptionsLayerInfo(item)
+    setClientJoinDialogIsOpen(true)
+  }
+
+  function closeClientJoinDialog() {
+    setClientJoinDialogIsOpen(false)
+  }
+
+  function handleClickOptionDialog(item) { 
+    requestOptionsLayerInfo(item)
+    setOptionsDialogIsOpen(true)
+  }
+
+  function closeOptionsDialog() {
     setOptionsDialogIsOpen(false)
   }
 
@@ -65,6 +77,11 @@ function ListLayer(props) {
               <IconButton className={classes.iconButton} value={layer} color="primary" aria-label="Info" onClick={() => handleClickOptionDialog(layer)}><Icon>settings</Icon></IconButton>
             </ListItemIcon>
             <ListItemIcon>
+              <IconButton className={classes.iconButton} value={layer} color="primary" aria-label="Info" onClick={() => handleClickClientJoinDialog(layer)}>
+                <AddCircleOutlineIcon/>
+              </IconButton>
+            </ListItemIcon>
+            <ListItemIcon>
               <IconButton className={classes.iconButton} color="secondary" aria-label="Info" onClick={() => iconHandleClickDelete(layer)}><DeleteIcon /></IconButton>
             </ListItemIcon>
             <ListItemText id="switch-list-label-wifi" primary={layer.name} />
@@ -75,6 +92,7 @@ function ListLayer(props) {
         ))}
       </List>
       <OptionsDialog layer={optionsLayer} isOpen={optionsDialogIsOpen} close={closeOptionsDialog}/>
+      <ClientJoinDialog layer={optionsLayer} isOpen={clientJoinDialogIsOpen} close={closeClientJoinDialog}/>
     </div>
   );
 }

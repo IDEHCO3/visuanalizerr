@@ -14,7 +14,6 @@ import Tab from '@material-ui/core/Tab';
 import AttributTab from './AttributTab'
 import OperationTab from './OperationTab'
 import RequestTab from './RequestTab'
-import JoinClientTab from './JoinClientTab'
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -61,13 +60,6 @@ export default function OptionsDialog(props) {
   const [ value, setValue ] = React.useState(0); // index of the tab
   const { layer, isOpen } = props;
 
-  /*useEffect( () => 
-    {
-      console.log("layer")
-      console.log(layer)
-    }
-  ,[layer])*/
-
   function handleTabChange(event, newValue) {
     setValue(newValue);
   }
@@ -101,7 +93,6 @@ export default function OptionsDialog(props) {
               <Tab label="Atributos" />
               <Tab label="Operações" />
               <Tab label="Requisições" />
-              <Tab label="Junções no cliente" />
             </Tabs>
           </Paper>
         </AppBar>
@@ -114,9 +105,6 @@ export default function OptionsDialog(props) {
         </TabPanel>
         <TabPanel value={value} index={2}>
           <RequestTab optionsLayer={layer} closeDialog={props.close} addLayerFromHyperResource={props.addLayerFromHyperResource}/>
-        </TabPanel>
-        <TabPanel value={value} index={3}>
-          <JoinClientTab optionsLayer={layer}/>
         </TabPanel>
 
       </Dialog>
