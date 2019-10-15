@@ -9,13 +9,13 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Slide from '@material-ui/core/Slide';
-import { InputLabel, MenuItem, FormControl, Select } from '@material-ui/core'; //Select Components
 import { InputBase, Divider, Tooltip } from '@material-ui/core'; // Text input components
 import { Stepper, Step, StepLabel } from '@material-ui/core';
 import { Button, Radio  } from '@material-ui/core';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 
+import { green } from '@material-ui/core/colors';
 import SearchIcon from '@material-ui/icons/Search';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -35,10 +35,6 @@ const useStyles = makeStyles(theme => ({
   },
   stepper:{
     width: '100%',
-  },
-  title: {
-    marginLeft: theme.spacing(2),
-    flex: 1,
   },
   LayerPropertyesContainer: {
     padding: theme.spacing(1),
@@ -64,12 +60,14 @@ const useStyles = makeStyles(theme => ({
     height: 28,
     margin: 4,
   },
-  formControl: {
-    minWidth: "95%",
-  },
   stepControlerButtons: {
-    textAlign: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    alignContent: 'flex-end',
   },
+  centerContent: {
+    justifyContent: 'center',
+  }
 }));
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -132,7 +130,14 @@ export default function OptionsDialog(props) {
   const [ selectedLayerProperty, setSelectedLayerProperty ] = useState('');
 
   const [ apiUrl, setApiUrl ] = useState('')
-  const [ apiResourceList, setApiResourceList ] = useState([])
+  const [ urlIsValid, setUrlIsValid ] = useState(false)
+  const [ apiList, setApiList ] = useState([
+    {name: 'Munic 2015', url: 'http://ggt-des.ibge.gov.br/api/munic-2015/', resources: []},
+    {name: 'PIB Municipio', url: 'http://ggt-des.ibge.gov.br/api/pib-municipio/', resources: []},
+    {name: 'Dados estatisticos Municipio', url: 'http://ggt-des.ibge.gov.br/api/estatistica-municipio/', resources: []},
+    {name: 'Analise GEO', url: 'http://ggt-des.ibge.gov.br/api/analise-geo/', resources: []},
+    {name: 'Pesquisa Esporte', url: 'http://ggt-des.ibge.gov.br/api/esporte-list/', resources: []},
+  ]) // a array with objects with apis features 
 
   useEffect(() => {
     if(layer.jsonOptions){
@@ -160,45 +165,67 @@ export default function OptionsDialog(props) {
     setSelectedLayerProperty(event.target.value);
   }
 
-  const selectApiHandleChange = event => {
-    setApiUrl(event.target.value)
-  }
-
   function HandleChangeOnApiUrl(e) {
     setApiUrl(e.target.value)
   }
 
-  function isEntryPoint(headers) {
+  async function checkEntryPoint(URL) { // verify if a url of a Hyper API is a entry point
+
+    const { headers } = await request(URL, axios.head);
     let id = headers.link.toUpperCase().indexOf('://schema.org/EntryPoint"'.toUpperCase())
-    return id !== -1
+
+    if (id !== -1)
+      return true
+    else
+      return false
+
   }
 
-  async function iconHandleClickSearch() {
-    if (!apiUrl || apiUrl.trim() === '')
+  async function handleClickSearchAPI(URL) {
+    setApiUrl(URL)
+
+    if (!URL || URL.trim() === '')
       return 
+    
+    /*let isEntryPoint = await checkEntryPoint(URL)
+    console.log(isEntryPoint)*/
 
-    const headResponse = await request(apiUrl, axios.head);
-    let arr = [];
-
-    if (isEntryPoint(headResponse.headers)) {
-      const result = await request(apiUrl);
+    if (await checkEntryPoint(URL)) {
+      const result = await request(URL);
       let json_entry_point = result.data;
+
       // Criando array de recursos
-      Object.entries(json_entry_point).forEach( ([key, value]) => { arr.push({name: key, url: value}); });  
-          
+      let resourcesList = []
+      Object.entries(json_entry_point).forEach( ([key, value]) => { resourcesList.push({name: key, url: value, resources: []}) })
+      //console.log(arr)
+
+      let temporaryApiList = apiList.slice(0)
+      let index = temporaryApiList.findIndex((item) => item.url === URL)
+      temporaryApiList[index].resources = resourcesList
+      setApiList(temporaryApiList)
+
     } else {
-      const response = await request(apiUrl, axios.options)
+      setUrlIsValid(true)
+      const response = await request(URL, axios.options)
       const json = response.data
-      let an_optionsLayer = new OptionsLayer(json, apiUrl)
+      let an_optionsResource = new OptionsLayer(json, URL)
       console.log('options')
-      console.log(an_optionsLayer)
+      console.log(an_optionsResource)
     }
-    console.log(arr)
-    setApiResourceList(arr);
+    
+  }
+
+  function nextStepIsDisable(){
+    if (activeStep === 0 && selectedLayerProperty === '')
+      return true
+    else if(activeStep === 1 && urlIsValid === false)
+      return true
+    else
+      return false
   }
 
   function iconHandleClickHighlightOff() {
-    setApiResourceList([]);
+    //setApiResourceList([]);
   }
 
   return (
@@ -250,30 +277,9 @@ export default function OptionsDialog(props) {
             </TabPanel>
 
             <TabPanel value={activeStep} index={1}>                                                 {/* SECOND STEP */}
-              <Grid container spacing={1}>
+              <Grid container spacing={1} >
                 
-                <Grid container item xs={12} spacing={3}>
-            
-                  <Grid item xs={4}>
-                    <Paper> 
-                    <FormControl className={classes.formControl}>
-                      <InputLabel htmlFor="age-simple">Serviços mais utilizados</InputLabel>
-                      <Select
-                        value={apiUrl}
-                        onChange={selectApiHandleChange}
-                        name='Api'
-                        fullWidth
-                      >
-                        <MenuItem value={""}></MenuItem>
-                        <MenuItem value={"http://ggt-des.ibge.gov.br/api/munic-2015/"}> Munic 2015 </MenuItem>
-                        <MenuItem value={"http://ggt-des.ibge.gov.br/api/pib-municipio/"}> PIB Municipio </MenuItem>
-                        <MenuItem value={"http://ggt-des.ibge.gov.br/api/estatistica-municipio/"}> Dados estatisticos Municipio </MenuItem>
-                        <MenuItem value={"http://ggt-des.ibge.gov.br/api/analise-geo/"}> Analise GEO </MenuItem>
-                        <MenuItem value={"http://ggt-des.ibge.gov.br/api/esporte-list/"}> Pesquisa Esporte </MenuItem>
-                      </Select>
-                    </FormControl>
-                    </Paper>
-                  </Grid>
+                <Grid container className={classes.centerContent} item xs={12} spacing={3}>
 
                   <Grid item xs={8}>
                       <Paper className={classes.inputUrlContainer}>
@@ -285,46 +291,54 @@ export default function OptionsDialog(props) {
                           onChange={HandleChangeOnApiUrl}
                         />
                         <Tooltip title="Buscar serviço" aria-label="Add">
-                          <IconButton className={classes.iconButton} aria-label="Buscar" onClick={iconHandleClickSearch}>
+                          <IconButton className={classes.iconButton} aria-label="Buscar" onClick={() => handleClickSearchAPI(apiUrl)}>
                             <SearchIcon color='primary'/>
                           </IconButton>  
                         </Tooltip>
                         <Divider className={classes.divider} orientation="vertical" />
-                        <Tooltip title="Remover API e Recursos" aria-label="Add">
+                        <Tooltip title="Recurso valido" aria-label="Add">
                           <IconButton className={classes.iconButton} aria-label="directions" onClick={iconHandleClickHighlightOff}>
-                            <CheckCircleIcon/>
+                            <CheckCircleIcon color={urlIsValid? "primary" : 'disabled'}/>
                           </IconButton>
-                        </Tooltip>      
+                        </Tooltip> 
+                
                       </Paper> 
                   </Grid>
-
-
-                  <Grid container item xs={12} spacing={3}>
-                    <Grid item xs={12}>
-                      <Paper>
-                        <TreeView
-                          className={classes.root}
-                          defaultCollapseIcon={<ExpandMoreIcon />}
-                          defaultExpandIcon={<ChevronRightIcon />}
-                        >
-                          <TreeItem nodeId="1" label="Applications">
-                            <TreeItem nodeId="2" label="Calendar" />
-                            <TreeItem nodeId="3" label="Chrome" />
-                            <TreeItem nodeId="4" label="Webstorm" />
-                          </TreeItem>
-                          <TreeItem nodeId="5" label="Documents">
-                            <TreeItem nodeId="6" label="Material-UI">
-                              <TreeItem nodeId="7" label="src">
-                                <TreeItem nodeId="8" label="index.js" />
-                                <TreeItem nodeId="9" label="tree-view.js" />
-                              </TreeItem>
+                  
+                  <Grid item xs={8}>
+                    <Paper>
+                      <TreeView
+                        className={classes.root}
+                        defaultCollapseIcon={<ExpandMoreIcon />}
+                        defaultExpandIcon={<ChevronRightIcon />}
+                        defaultExpanded={['1']}
+                      >
+                        <TreeItem nodeId="1" label="Serviços">
+                          { apiList.map( (item, index) => (
+                            <TreeItem 
+                              key={index} 
+                              nodeId={item.url} 
+                              label={item.name}
+                              onClick={() => {handleClickSearchAPI(item.url)}} 
+                            >
+                              { item.resources.length>0 ? 
+                                  item.resources.map((A_resource, indexR) => (
+                                    <TreeItem 
+                                      key={indexR}
+                                      nodeId={A_resource.url} 
+                                      label={A_resource.name}
+                                      onClick={ () => {handleClickSearchAPI(A_resource.url)} } 
+                                    /> 
+                                  ))
+                                  : 
+                                  <div/>
+                              }
                             </TreeItem>
-                          </TreeItem>
-                        </TreeView>
-                      </Paper>
-                    </Grid>
+                          ))}
+                        </TreeItem>
+                      </TreeView>
+                    </Paper>
                   </Grid>
-
                   
                 </Grid>
               </Grid>            
@@ -338,19 +352,20 @@ export default function OptionsDialog(props) {
               CCC
             </TabPanel>
 
-            <div className={classes.stepControlerButtons}>
-              <Button
-                disabled={activeStep === 0}
-                onClick={handleBackStep}
-                className={classes.backButton}
-              >
-                Voltar
-              </Button>
-              <Button variant="contained" color="primary" onClick={handleNextStep}>
-                {activeStep === steps.length - 1 ? 'Juntar dados' : 'Proximo'}
-              </Button>
-            </div>
+            
           </div>
+        </div>
+        <div className={classes.stepControlerButtons}>
+          <Button
+            disabled={activeStep === 0}
+            onClick={handleBackStep}
+            className={classes.backButton}
+          >
+            Voltar
+          </Button>
+          <Button variant="contained" color="primary" disabled={nextStepIsDisable()} onClick={handleNextStep}>
+            {activeStep === steps.length - 1 ? 'Juntar dados' : 'Proximo'}
+          </Button>
         </div>
       </Dialog>
     </div>
