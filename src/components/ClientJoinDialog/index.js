@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import { IconButton, Box, Paper } from '@material-ui/core';
+import { Box, Paper } from '@material-ui/core';
 import { List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
@@ -11,11 +11,11 @@ import Typography from '@material-ui/core/Typography';
 import Slide from '@material-ui/core/Slide';
 import { InputBase, Divider, Tooltip } from '@material-ui/core'; // Text input components
 import { Stepper, Step, StepLabel } from '@material-ui/core';
-import { Button, Radio  } from '@material-ui/core';
+import { Button, IconButton, Radio, Checkbox } from '@material-ui/core';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 
-import { green } from '@material-ui/core/colors';
+//import { green } from '@material-ui/core/colors';
 import SearchIcon from '@material-ui/icons/Search';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -127,7 +127,7 @@ export default function OptionsDialog(props) {
   const [ activeStep, setActiveStep ] = React.useState(0);
 
   const [ supportedProperties, setSuportedProperties ] = useState([])
-  const [ selectedLayerProperty, setSelectedLayerProperty ] = useState('');
+  const [ selectedLayerProperty, setSelectedLayerProperty ] = useState('')
 
   const [ apiUrl, setApiUrl ] = useState('')
   const [ urlIsValid, setUrlIsValid ] = useState(false)
@@ -139,6 +139,11 @@ export default function OptionsDialog(props) {
     {name: 'Pesquisa Esporte', url: 'http://ggt-des.ibge.gov.br/api/esporte-list/', resources: []},
   ]) // a array with objects with apis features 
 
+  const [ resourcePropertiesList, setResourcePropertiesList ] = useState([])
+  const [ selectedResourceProperty, setSelectedResourceProperty ] = useState('')
+
+  const [ propertiesToAddOnLayer, setPropertiesToAddOnLayer ] = useState([])
+
   useEffect(() => {
     if(layer.jsonOptions){
       setSuportedProperties(layer.supportedProperties)
@@ -148,7 +153,9 @@ export default function OptionsDialog(props) {
   const handleNextStep = () => {
     if(activeStep === steps.length - 1 ){
       console.log("Jutar dados")
-    } else{
+      handleAddProperties()
+      //handleClose()
+    } else {
       setActiveStep(prevActiveStep => prevActiveStep + 1)
     }
   }
@@ -159,10 +166,6 @@ export default function OptionsDialog(props) {
 
   function handleClose() {
     props.close()
-  }
-
-  const handleChangeInSelectedLayerProperty = event => {
-    setSelectedLayerProperty(event.target.value);
   }
 
   function HandleChangeOnApiUrl(e) {
@@ -186,18 +189,13 @@ export default function OptionsDialog(props) {
 
     if (!URL || URL.trim() === '')
       return 
-    
-    /*let isEntryPoint = await checkEntryPoint(URL)
-    console.log(isEntryPoint)*/
 
     if (await checkEntryPoint(URL)) {
+      setUrlIsValid(false)
       const result = await request(URL);
       let json_entry_point = result.data;
-
-      // Criando array de recursos
       let resourcesList = []
-      Object.entries(json_entry_point).forEach( ([key, value]) => { resourcesList.push({name: key, url: value, resources: []}) })
-      //console.log(arr)
+      Object.entries(json_entry_point).forEach( ([key, value]) => { resourcesList.push({name: key, url: value, resources: []}) })// Criando array de recursos
 
       let temporaryApiList = apiList.slice(0)
       let index = temporaryApiList.findIndex((item) => item.url === URL)
@@ -209,10 +207,22 @@ export default function OptionsDialog(props) {
       const response = await request(URL, axios.options)
       const json = response.data
       let an_optionsResource = new OptionsLayer(json, URL)
-      console.log('options')
-      console.log(an_optionsResource)
+      setResourcePropertiesList(an_optionsResource.jsonOptions['hydra:supportedProperties'])
     }
     
+  }
+
+  function handleClickOnCheckBox(property) {
+
+    let temporaryPropertyList = propertiesToAddOnLayer.slice(0)
+    
+    if (temporaryPropertyList.includes(property)){
+      let index = temporaryPropertyList.findIndex(item => item === property)
+      temporaryPropertyList.splice(index , 1)
+    } else {
+      temporaryPropertyList.push(property)
+    }
+    setPropertiesToAddOnLayer(temporaryPropertyList)
   }
 
   function nextStepIsDisable(){
@@ -220,12 +230,34 @@ export default function OptionsDialog(props) {
       return true
     else if(activeStep === 1 && urlIsValid === false)
       return true
+    else if(activeStep === 2 && selectedResourceProperty === '')
+      return true
+    else if(activeStep === 3 && propertiesToAddOnLayer.length < 1)
+      return true
     else
       return false
   }
 
-  function iconHandleClickHighlightOff() {
-    //setApiResourceList([]);
+  async function handleAddProperties() {
+    
+    await supportedProperties.map(async layer => {
+      const url = `${apiUrl}filter/${selectedResourceProperty}/eq/${layer.getProperties()[selectedLayerProperty]}`
+      console.log(url)
+      try {
+        const response = await axios.get(url)
+        response.data.map(prop => {
+          Object.keys(prop).map(propKey => {
+            if (propertiesToAddOnLayer.includes(propKey)) {
+              layer.setProperties({[propKey]: prop[propKey]})
+            }
+          })
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    })
+
+    props.addPropertiesToLayer()
   }
 
   return (
@@ -265,7 +297,7 @@ export default function OptionsDialog(props) {
                     <ListItemSecondaryAction>
                       <Radio
                         checked={selectedLayerProperty === property["hydra:property"]}
-                        onChange={handleChangeInSelectedLayerProperty}
+                        onChange={(event) => setSelectedLayerProperty(event.target.value)}
                         value={property["hydra:property"]}
                         name="radio-button-demo"
                       />                       
@@ -297,7 +329,7 @@ export default function OptionsDialog(props) {
                         </Tooltip>
                         <Divider className={classes.divider} orientation="vertical" />
                         <Tooltip title="Recurso valido" aria-label="Add">
-                          <IconButton className={classes.iconButton} aria-label="directions" onClick={iconHandleClickHighlightOff}>
+                          <IconButton className={classes.iconButton} aria-label="directions">
                             <CheckCircleIcon color={urlIsValid? "primary" : 'disabled'}/>
                           </IconButton>
                         </Tooltip> 
@@ -313,7 +345,7 @@ export default function OptionsDialog(props) {
                         defaultExpandIcon={<ChevronRightIcon />}
                         defaultExpanded={['1']}
                       >
-                        <TreeItem nodeId="1" label="Serviços">
+                        <TreeItem nodeId="1" label="Serviços mais utilizados">
                           { apiList.map( (item, index) => (
                             <TreeItem 
                               key={index} 
@@ -345,11 +377,44 @@ export default function OptionsDialog(props) {
             </TabPanel>
 
             <TabPanel value={activeStep} index={2}>                                                 {/* THIRD STEP */}
-              CCC
+              <Paper className={classes.LayerPropertyesContainer}> 
+                <List dense={false}>
+                { resourcePropertiesList.map( (property, index) => (
+                  <ListItem button key={index}>
+
+                    <ListItemText primary={property["hydra:property"]} />
+
+                    <ListItemSecondaryAction>
+                      <Radio
+                        checked={selectedResourceProperty === property["hydra:property"]}
+                        onChange={(event) => setSelectedResourceProperty(event.target.value)}
+                        value={property["hydra:property"]}
+                      />                       
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+                </List>
+              </Paper>
             </TabPanel>
 
             <TabPanel value={activeStep} index={3}>                                                 {/* FOURTH STEP */}
-              CCC
+              <Paper className={classes.LayerPropertyesContainer}> 
+                <List dense={false}>
+                { resourcePropertiesList.map( (property, index) => (
+                  <ListItem button key={index}>
+
+                    <ListItemText primary={property["hydra:property"]} />
+
+                    <ListItemSecondaryAction>
+                      <Checkbox
+                        checked={propertiesToAddOnLayer.includes(property["hydra:property"])}
+                        onChange={() => handleClickOnCheckBox(property["hydra:property"])}
+                      />                     
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+                </List>
+              </Paper>
             </TabPanel>
 
             

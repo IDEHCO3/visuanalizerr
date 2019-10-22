@@ -97,22 +97,17 @@ function App(props) {
       let temporaryIsExpanded = expanded.slice(0);
       temporaryIsExpanded[position] = !temporaryIsExpanded[position]
       setExpanded(temporaryIsExpanded);
-    };
-    
-    function buttonClicked(e)    {
-      setDrawerIsOpen(!drawerIsOpen)
-      //console.log(e)
-    };
+    }
     
     function baseLayerChanged(value) {
       facadeOL.setBaseLayer(value);
-    };
+    }
 
     function deleteSelectedLayerResource(a_resource_layer) {
       let arr = layersResource.filter(layer =>  layer !== a_resource_layer);
       setLayersResource(arr)
       facadeOL.map.removeLayer(a_resource_layer.layer)
-    };
+    }
 
     async function getUpdatedLayerFromLayersResource(layer_resource_name, is_checked) {
       let a_resource_layer = null
@@ -125,7 +120,7 @@ function App(props) {
       })
       setLayersResource(arr)
       return a_resource_layer
-    };
+    }
 
     async function switchSelectedLayerResource(layer_resource_name, is_checked) {
       let a_resource_layer = await getUpdatedLayerFromLayersResource(layer_resource_name, is_checked)
@@ -137,7 +132,7 @@ function App(props) {
         facadeOL.map.addLayer(a_resource_layer.layer)
       else
         facadeOL.map.removeLayer(a_resource_layer.layer)
-    };
+    }
 
     function extractIRIFromLinkHeaders(name_in_the_link, headers) {
       const link = headers.link
@@ -161,10 +156,10 @@ function App(props) {
 
     function styleFromHeaders(headers) {
       return extractIRIFromLinkHeaders('stylesheet', headers)
-    };
+    }
 
     async function addLayerFromHyperResource(a_GeoHyperLayerResource) {
-      
+     
       if (a_GeoHyperLayerResource.is_image)
       {
         let  image_layer_ol = await facadeOL.addHyperResourceImageLayer(a_GeoHyperLayerResource.iri)  
@@ -180,38 +175,44 @@ function App(props) {
         //console.log(style_iri)
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
         a_GeoHyperLayerResource.layer = vector_layer_ol
-        let arr = layersResource.concat([a_GeoHyperLayerResource]) 
+        let arr = layersResource.concat([a_GeoHyperLayerResource])
+        console.log(arr)
         setLayersResource(arr)
         a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-        //console.log(layersResource)
+        //console.log(a_GeoHyperLayerResource.layer)
+        //console.log(a_GeoHyperLayerResource.layer.getProperties())
       }  
       
-    };
+    }
 
     async function addLayerFromWMS(a_WMSCapabilityLayer) {
       let  wms_layer =  facadeOL.addWMSLayer(a_WMSCapabilityLayer)
       let arr = layersResource.concat([wms_layer]) 
       setLayersResource(arr)
-      
-    };
+    }
     
+    function addPropertiesToVectorLayer(indexOfTheLayer, indexOftheFeature, newProperties){
+      FacadeOL.setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties)
+      //console.log(layersResource)
+    }
+
     useEffect(() => {
       setFacadeOL(new FacadeOL())
       //facadeOL.setPopupInElement(document.getElementById('popup'))
     
-    }, [facadeOL.currentBaseLayerName]); // Only re-run the effect if facadeOL.currentBaseLayerName changes
+    }, [facadeOL.currentBaseLayerName]) // Only re-run the effect if facadeOL.currentBaseLayerName changes
         
     return (
         
         <div>
           <div id="map" style={{position: "fixed", width: "100%", height: "100%",  bottom: 0, zindex: 0 }}><div id="popup" ref = {popupElementRef} ></div></div>
-          <Fab color="primary" aria-label="Add"  size="small" style = {{position: "fixed", top: 25}}  onClick={buttonClicked}  >
+          <Fab color="primary" aria-label="Add"  size="small" style = {{position: "fixed", top: 25}}  onClick={() => setDrawerIsOpen(!drawerIsOpen)}  >
               <TouchAppIcon />
           </Fab>
                     
           <Drawer open={drawerIsOpen} variant="persistent">
               <div >
-                <IconButton onClick={(e) => setDrawerIsOpen(!drawerIsOpen)}>
+                <IconButton onClick={() => setDrawerIsOpen(!drawerIsOpen)}>
                   {<ChevronLeftIcon />}
                 </IconButton>
               </div>
@@ -254,6 +255,7 @@ function App(props) {
                       layersResource={layersResource} 
                       deleteSelectedLayerResource={deleteSelectedLayerResource}
                       switchSelectedLayerResource={switchSelectedLayerResource}
+                      addPropertiesToLayer={addPropertiesToVectorLayer}
                     /> 
                   </ExpansionPanelDetails>
                 </ExpansionPanel>

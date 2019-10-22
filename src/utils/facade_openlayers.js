@@ -31,7 +31,6 @@ export class FacadeOL {
       this.popup = new Popup();
       this.map.addOverlay(this.popup);
       this.onClickMap()
-      
     }
     // Begins - These operations are related to the baselayer
     //return a null base layer
@@ -123,7 +122,7 @@ export class FacadeOL {
               
       if (feature) {
         let str = ''
-        const entries = Object.entries(feature.values_)  
+        const entries = Object.entries(feature.values_)
         
         entries.forEach(entry => {
           let key = entry[0];
@@ -150,7 +149,6 @@ export class FacadeOL {
         let layer = null
         let feature = this.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) { return feature})  
         this.displayFeatureInfo(evt, feature, layer)
-        
       })
     }
     // End - events
@@ -163,26 +161,48 @@ export class FacadeOL {
     async addVectorLayerFromGeoJSON(geoJson, style_iri) {
       let style = null
       
-       try { 
-          if (style_iri) {
-            let response = await request(style_iri)
-            style = await new Style({ image: new Icon({src: response.data})});
-          }
-            
-        } catch (e) {
-       
-          console.log("Houve algum erro durante a requisição. ");
-          console.log(style_iri);
-          console.log(e);
+      try { 
+        if (style_iri) {
+          let response = await request(style_iri)
+          style = await new Style({ image: new Icon({src: response.data})});
+        }
+      } catch (e) {
+        console.log("Houve algum erro durante a requisição. ");
+        console.log(style_iri);
+        console.log(e);
       } finally {
-          const gjson_format = new GeoJSON().readFeatures(geoJson, {featureProjection: this.map.getView().getProjection()})
-          const vector_source = new Vector({features: gjson_format})
-          const vector_layer = new VectorLayer({ renderMode: 'image', source: vector_source })
-          if (style)
-            vector_layer.setStyle(style)
-          this.map.addLayer(vector_layer)
-          return vector_layer
+        const gjson_format = new GeoJSON().readFeatures(geoJson, {featureProjection: this.map.getView().getProjection()})
+        //gjson_format.forEach((item) => console.log(item.getProperties()))
+
+        //console.log(gjson_format[0].getProperties())  // ---------------------------------- Propriedades da primeira feature da camada
+        //gjson_format[0].setProperties({atributo: 'teste'}) //setando propriedade
+
+        const vector_source = new Vector({features: gjson_format})
+        const vector_layer = new VectorLayer({ renderMode: 'image', source: vector_source })
+
+        if (style)
+          vector_layer.setStyle(style)
+        this.map.addLayer(vector_layer)
+        this.setPropertiesOnFeaturesFromVectorLayerOnMap(1, 0, {suco: "limao", cor:"lilas"})
+        return vector_layer
       }
+    }
+
+    //return a array of objects with the features propreties of a vector layer by passing the zIndex of the layer
+    getPropertiesOfFeaturesFromVectorLayerOnMap(IndexOfTheLayer) {
+      const layersList = this.map.getLayers().array_
+      const featureList = layersList[IndexOfTheLayer].getSource().getFeatures()
+      let propretiesList = []
+      featureList.forEach( feature => propretiesList.push(feature.getProperties()) )
+      return propretiesList
+    }
+
+    // Sets a collection of key-value pairs on feature. Note that this changes any existing properties and adds new ones (it does not remove any existing properties).
+    setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties) {
+      const layersList = this.map.getLayers().array_
+      const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
+      featureList[indexOftheFeature].setProperties(newProperties)
+      //console.log(featureList[indexOftheFeature].getProperties())
     }
 
     async addHyperResourceImageLayer (url) {

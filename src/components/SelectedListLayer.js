@@ -30,10 +30,12 @@ const styles = theme => ({
   }
 });
 function ListLayer(props) {
-  const classes = props;
-  const [ optionsDialogIsOpen, setOptionsDialogIsOpen ] = useState(false);
-  const [ clientJoinDialogIsOpen, setClientJoinDialogIsOpen ] = useState(false);
-  const [ optionsLayer, setOptionsLayer ] = useState(new OptionsLayer());
+  const classes = props
+  const [ optionsDialogIsOpen, setOptionsDialogIsOpen ] = useState(false)
+  const [ optionsLayer, setOptionsLayer ] = useState(new OptionsLayer())
+
+  const [ clientJoinDialogIsOpen, setClientJoinDialogIsOpen ] = useState(false)
+  const [ indexOfClickedLayer, setIndexOfClickedLayer ] = useState(0)
 
   function switchHandleChange(event, is_ckecked) {  
     props.switchSelectedLayerResource(event.target.value, is_ckecked)
@@ -47,6 +49,7 @@ function ListLayer(props) {
   }
 
   function handleClickClientJoinDialog(item) { 
+    setIndexOfClickedLayer(item.layer.values_.zIndex)
     requestOptionsLayerInfo(item)
     setClientJoinDialogIsOpen(true)
   }
@@ -92,7 +95,13 @@ function ListLayer(props) {
         ))}
       </List>
       <OptionsDialog layer={optionsLayer} isOpen={optionsDialogIsOpen} close={closeOptionsDialog}/>
-      <ClientJoinDialog layer={optionsLayer} isOpen={clientJoinDialogIsOpen} close={closeClientJoinDialog}/>
+      <ClientJoinDialog 
+        layer={optionsLayer} 
+        indexOfLayer={indexOfClickedLayer}
+        addPropertiesToLayer={props.addPropertiesToLayer} 
+        isOpen={clientJoinDialogIsOpen} 
+        close={closeClientJoinDialog}
+      />
     </div>
   );
 }
