@@ -122,7 +122,7 @@ function getStepContent(stepIndex) {
 
 export default function OptionsDialog(props) {
   const classes = useStyles();
-  const { layer, isOpen } = props;
+  const { layer, isOpen, indexOfLayer } = props;
   const steps = getSteps();
   const [ activeStep, setActiveStep ] = React.useState(0);
 
@@ -238,26 +238,64 @@ export default function OptionsDialog(props) {
       return false
   }
 
-  async function handleAddProperties() {
-    
-    await supportedProperties.map(async layer => {
-      const url = `${apiUrl}filter/${selectedResourceProperty}/eq/${layer.getProperties()[selectedLayerProperty]}`
-      console.log(url)
-      try {
-        const response = await axios.get(url)
-        response.data.map(prop => {
-          Object.keys(prop).map(propKey => {
-            if (propertiesToAddOnLayer.includes(propKey)) {
-              layer.setProperties({[propKey]: prop[propKey]})
-            }
+  function handleAddProperties() {
+    let propertiesOnLayer = props.getPropertiesFromLayer(indexOfLayer)
+    console.log(propertiesOnLayer)
+    const urlLengthLimit = 2048
+    let j = 0    
+    let url = ''
+    for( let i = 0; i <= propertiesOnLayer.length; i++ ){
+      if( url.length === 0 ){
+        url = `${apiUrl}/filter/${selectedResourceProperty}/eq/${propertiesOnLayer[i][selectedLayerProperty]}`
+      } else if ( url.length > 0 && (url + `/${propertiesOnLayer[i][selectedLayerProperty]}`).length <= urlLengthLimit ) {
+        url+= `/${propertiesOnLayer[i][selectedLayerProperty]}` // corrigir para sintaxe do hyper
+      } else if ( (url + `/${propertiesOnLayer[i][selectedLayerProperty]}`).length > urlLengthLimit ) {
+        
+        //let response = await request(url)
+        /*response.data.map( prop => {
+        Object.keys(prop).map( propKey => {
+          console.log(propKey)
+          if (propertiesToAddOnLayer.includes(propKey)) {
+            console.log("inclui")
+            //props.addPropertiesToLayer(indexOfLayer, )
+            //layer.setProperties({[propKey]: prop[propKey]})
+          }
           })
-        })
-      } catch (error) {
-        console.log(error)
+        })*/
+        console.log(url)
+        console.log(j)
+        j++
+                
+        url = `${apiUrl}/filter/${selectedResourceProperty}/eq/${propertiesOnLayer[i][selectedLayerProperty]}`
       }
-    })
-
-    props.addPropertiesToLayer()
+    }
+    /*propertiesOnLayer.forEach( 
+      async featureProperty => {
+        if( url.length === 0 ){
+          url = `${apiUrl}/filter/${selectedResourceProperty}/eq/${featureProperty[selectedLayerProperty]}`
+        } else if ( url.length > 0 && (url + `/${featureProperty[selectedLayerProperty]}`).length <= urlLengthLimit ) {
+          url+= `/${featureProperty[selectedLayerProperty]}` // corrigir para sintaxe do hyper
+        } else if ( (url + `/${featureProperty[selectedLayerProperty]}`).length > urlLengthLimit ) {
+          
+          //let response = await request(url)
+          /*response.data.map( prop => {
+          Object.keys(prop).map( propKey => {
+            console.log(propKey)
+            if (propertiesToAddOnLayer.includes(propKey)) {
+              console.log("inclui")
+              //props.addPropertiesToLayer(indexOfLayer, )
+              //layer.setProperties({[propKey]: prop[propKey]})
+            }
+            })
+          })
+          console.log(url)
+          console.log(i)
+          i++
+          
+          url = `${apiUrl}/filter/${selectedResourceProperty}/eq/${featureProperty[selectedLayerProperty]}`
+        }
+      }
+    )*/
   }
 
   return (

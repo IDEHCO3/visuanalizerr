@@ -32,31 +32,38 @@ export class FacadeOL {
       this.map.addOverlay(this.popup);
       this.onClickMap()
     }
+
     // Begins - These operations are related to the baselayer
     //return a null base layer
     nullBaseLayer() {
       return null
     }
+
     //returns a OSM TileLayer as baselayer
     osmBaseLayer() {
         return new TileLayer({ source: new XYZ({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'}), zIndex: 0 })
     }
+
     //returns a google TileLayer as baselayer
     googleBaseLayer() {
       return new TileLayer({source: new XYZ({url: 'http://mt{0-3}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'}), zIndex: 0})
     }
+
     //returns a google satelite TileLayer as baselayer
     sateliteBaseLayer() {
       return new TileLayer({source: new TileImage({ url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}'}), zIndex: 0})
     }
+
     //returns a water TileLayer as baselayer
     watercolorBaseLayer() {
       return new TileLayer({source: new XYZ({url: 'http://{a-c}.tile.stamen.com/watercolor/{z}/{x}/{y}.png'}), zIndex: 0})
     }
+
     //returns wikimedia TileLayer as baselayer
     wikimediaBaseLayer() {
       return new TileLayer({source: new XYZ({url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png'}), zIndex: 0})
     }
+
     //returns a TileLayer based on name(a_baseLayer_name) or null
     baseLayer(a_baseLayer_name) {
       // name: 'Wikimedia', value: 'wikimedia'}, {name: 'Nenhum', value: null}]
@@ -72,6 +79,7 @@ export class FacadeOL {
         }
       return layers[a_baseLayer_name]
     }
+
     setBaseLayer(a_baseLayer_name) {
       this.map.removeLayer(this.currentBaseLayer)
       if (!a_baseLayer_name)
@@ -81,22 +89,44 @@ export class FacadeOL {
       this.map.addLayer(this.currentBaseLayer)
       this.currentBaseLayer.setZIndex(0);
     }
+
     // Ends - These operations above are related to the baselayer
     // Begins - These operations are related to the WMS
     getWMSCapabilitiesAsJSON(resquestedXml) {
       let  parser = new WMSCapabilities()
       return parser.read(resquestedXml)
     }
+
     getWMSCapabilityLayers(requestedXml) {
       let capability_json = this.getWMSCapabilitiesAsJSON(requestedXml)
       let layers = capability_json.Capability.Layer.Layer
       
       return layers.map((a_layer) => new WMSCapabilityLayer(a_layer, capability_json.version, capability_json.Service.OnlineResource))
     }
+
     getWMSMap(wmsLayer) {
       let wmsSource = new ImageWMS({url: wmsLayer.entryPoint +'/wms', params: {'LAYERS': wmsLayer.name}})
       return new ImageLayer({extent: wmsLayer.bbox, source: wmsSource})
     }
+
+    //return a array of objects with the features propreties of a vector layer by passing the zIndex of the layer
+    getPropertiesOfFeaturesFromVectorLayerOnMap(indexOfTheLayer) {
+      const layersList = this.map.getLayers().array_
+      
+      const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
+      let propretiesList = []
+      featureList.forEach( feature => propretiesList.push(feature.getProperties()) )
+      return propretiesList
+    }
+
+    // Sets a collection of key-value pairs on feature. Note that this changes any existing properties and adds new ones (it does not remove any existing properties).
+    setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties) {
+      const layersList = this.map.getLayers().array_
+      const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
+      featureList[indexOftheFeature].setProperties(newProperties)
+      //console.log(featureList[indexOftheFeature].getProperties())
+    } 
+
     addWMSLayer(wmsLayer) {
       let image_layer = this.getWMSMap(wmsLayer)
       this.map.addLayer(image_layer)
@@ -174,35 +204,14 @@ export class FacadeOL {
         const gjson_format = new GeoJSON().readFeatures(geoJson, {featureProjection: this.map.getView().getProjection()})
         //gjson_format.forEach((item) => console.log(item.getProperties()))
 
-        //console.log(gjson_format[0].getProperties())  // ---------------------------------- Propriedades da primeira feature da camada
-        //gjson_format[0].setProperties({atributo: 'teste'}) //setando propriedade
-
         const vector_source = new Vector({features: gjson_format})
         const vector_layer = new VectorLayer({ renderMode: 'image', source: vector_source })
 
         if (style)
           vector_layer.setStyle(style)
         this.map.addLayer(vector_layer)
-        this.setPropertiesOnFeaturesFromVectorLayerOnMap(1, 0, {suco: "limao", cor:"lilas"})
         return vector_layer
       }
-    }
-
-    //return a array of objects with the features propreties of a vector layer by passing the zIndex of the layer
-    getPropertiesOfFeaturesFromVectorLayerOnMap(IndexOfTheLayer) {
-      const layersList = this.map.getLayers().array_
-      const featureList = layersList[IndexOfTheLayer].getSource().getFeatures()
-      let propretiesList = []
-      featureList.forEach( feature => propretiesList.push(feature.getProperties()) )
-      return propretiesList
-    }
-
-    // Sets a collection of key-value pairs on feature. Note that this changes any existing properties and adds new ones (it does not remove any existing properties).
-    setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties) {
-      const layersList = this.map.getLayers().array_
-      const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
-      featureList[indexOftheFeature].setProperties(newProperties)
-      //console.log(featureList[indexOftheFeature].getProperties())
     }
 
     async addHyperResourceImageLayer (url) {

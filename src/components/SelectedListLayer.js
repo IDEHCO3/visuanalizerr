@@ -49,6 +49,7 @@ function ListLayer(props) {
   }
 
   function handleClickClientJoinDialog(item) { 
+    console.log(props)
     setIndexOfClickedLayer(item.layer.values_.zIndex)
     requestOptionsLayerInfo(item)
     setClientJoinDialogIsOpen(true)
@@ -94,10 +95,16 @@ function ListLayer(props) {
           </ListItem>
         ))}
       </List>
-      <OptionsDialog layer={optionsLayer} isOpen={optionsDialogIsOpen} close={closeOptionsDialog}/>
+      <OptionsDialog 
+        layer={optionsLayer}
+        isOpen={optionsDialogIsOpen}
+        close={closeOptionsDialog}
+        addLayerFromHyperResource={props.addLayerFromHyperResource}
+      />
       <ClientJoinDialog 
         layer={optionsLayer} 
         indexOfLayer={indexOfClickedLayer}
+        getPropertiesFromLayer={props.getPropertiesFromLayer}
         addPropertiesToLayer={props.addPropertiesToLayer} 
         isOpen={clientJoinDialogIsOpen} 
         close={closeClientJoinDialog}

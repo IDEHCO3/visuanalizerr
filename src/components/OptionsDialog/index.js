@@ -114,4 +114,5 @@ export default function OptionsDialog(props) {
 
 OptionsDialog.propTypes = {
   layer: PropTypes.any.isRequired,
+  addLayerFromHyperResource: PropTypes.any.isRequired,
 };

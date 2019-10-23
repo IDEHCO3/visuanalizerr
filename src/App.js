@@ -176,11 +176,9 @@ function App(props) {
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
         a_GeoHyperLayerResource.layer = vector_layer_ol
         let arr = layersResource.concat([a_GeoHyperLayerResource])
-        console.log(arr)
+        
         setLayersResource(arr)
         a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-        //console.log(a_GeoHyperLayerResource.layer)
-        //console.log(a_GeoHyperLayerResource.layer.getProperties())
       }  
       
     }
@@ -190,9 +188,14 @@ function App(props) {
       let arr = layersResource.concat([wms_layer]) 
       setLayersResource(arr)
     }
-    
-    function addPropertiesToVectorLayer(indexOfTheLayer, indexOftheFeature, newProperties){
-      FacadeOL.setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties)
+
+    function getPropertiesFromVectorLayer(indexOfTheLayer) {
+      const propertyList = facadeOL.getPropertiesOfFeaturesFromVectorLayerOnMap(indexOfTheLayer)
+      return propertyList
+    }
+
+    function addPropertiesToVectorLayer(indexOfTheLayer, indexOftheFeature, newProperties) {
+      facadeOL.setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties)
       //console.log(layersResource)
     }
 
@@ -255,8 +258,10 @@ function App(props) {
                       layersResource={layersResource} 
                       deleteSelectedLayerResource={deleteSelectedLayerResource}
                       switchSelectedLayerResource={switchSelectedLayerResource}
+                      getPropertiesFromLayer={getPropertiesFromVectorLayer}
                       addPropertiesToLayer={addPropertiesToVectorLayer}
-                    /> 
+                      addLayerFromHyperResource={addLayerFromHyperResource}
+                    />
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               </div>

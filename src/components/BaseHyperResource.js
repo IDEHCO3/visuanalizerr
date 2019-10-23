@@ -135,7 +135,12 @@ export default function BaseHyperResource(props) {
         </Tooltip>      
       </Paper>
       
-      <ListLayer items={items} selectedItemName={selectedItemName} addLayerFromHyperResource={props.addLayerFromHyperResource}/>
+      <ListLayer 
+        items={items} 
+        selectedItemName={selectedItemName} 
+        addLayerFromHyperResource={props.addLayerFromHyperResource}
+        type={'HypeResource'}
+      />
     </div>
   );
 }
