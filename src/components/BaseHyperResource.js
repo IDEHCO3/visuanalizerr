@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
@@ -96,8 +97,11 @@ export default function BaseHyperResource(props) {
   }
 
   return (
-    <div>
-      <Typography variant="h6">Urls de entrada </Typography>
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6">Urls de entrada </Typography>
+      </Grid>
+      <Grid item xs={12}>
       <FormControl className={classes.formControl}>
         <InputLabel htmlFor="age-simple">Serviços mais utilizados</InputLabel>
         <Select
@@ -113,7 +117,9 @@ export default function BaseHyperResource(props) {
           <MenuItem value={"http://ggt-des.ibge.gov.br/api/ibge/recursos-naturais/cobertura-uso-terra/"}>CREN - Cobertura de terra</MenuItem>
         </Select>
       </FormControl>
+      </Grid>
 
+      <Grid item xs={12}>
       <Paper className={classes.root}>
         <InputBase
           className={classes.input}
@@ -134,13 +140,15 @@ export default function BaseHyperResource(props) {
           </IconButton>
         </Tooltip>      
       </Paper>
-      
+      </Grid>
+      <Grid item xs={12}>
       <ListLayer 
         items={items} 
         selectedItemName={selectedItemName} 
         addLayerFromHyperResource={props.addLayerFromHyperResource}
         type={'HypeResource'}
       />
-    </div>
+      </Grid>
+    </Grid>
   );
 }

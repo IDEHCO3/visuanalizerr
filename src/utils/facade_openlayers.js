@@ -109,13 +109,32 @@ export class FacadeOL {
       return new ImageLayer({extent: wmsLayer.bbox, source: wmsSource})
     }
 
+    //return a array of features of a vector layer by passing the zIndex of the layer
+    getFeaturesFromVectorLayerOnMap(ZIndexOfTheLayer) {
+      const layersList = this.map.getLayers().array_
+      let featureList
+      if(layersList[ZIndexOfTheLayer].type === "VECTOR"){
+        featureList = layersList[ZIndexOfTheLayer].getSource().getFeatures()
+      }
+      return featureList
+    }
+
+    //return a array of objects with the features propreties by passing a array of features
+    getPropertiesFromFeatures(featureList) {
+      return featureList.map( feature => feature.getProperties() )
+    }
+
+    //recive a feature(OL gerated) object and a object with the new Properties and add this properties to the feature 
+    addPropertiesInAFeature(OlFeature, newProperties) {
+      OlFeature.setProperties(newProperties)
+    }
+
     //return a array of objects with the features propreties of a vector layer by passing the zIndex of the layer
     getPropertiesOfFeaturesFromVectorLayerOnMap(indexOfTheLayer) {
       const layersList = this.map.getLayers().array_
-      
       const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
-      let propretiesList = []
-      featureList.forEach( feature => propretiesList.push(feature.getProperties()) )
+      let propretiesList = featureList.map( feature => feature.getProperties() )
+      console.log(propretiesList)
       return propretiesList
     }
 
@@ -188,13 +207,23 @@ export class FacadeOL {
     //  return new HyperResourceLayer(name, iri);
     //}
 
-    async addVectorLayerFromGeoJSON(geoJson, style_iri) {
-      let style = null
-      
+    async addVectorLayerFromGeoJSON(geoJson, style_iri) { //fazer verificação pro tipo de feature do geoJson e aplicar o estilo de forma diferente para cada tipo (linha, ponto e poligono)
+      let style = null 
+
       try { 
         if (style_iri) {
           let response = await request(style_iri)
-          style = await new Style({ image: new Icon({src: response.data})});
+          const featureType = geoJson.features[0].geometry.type
+          
+          if(featureType === "Point" || featureType === "MultiPoint"){
+            style = await new Style({ image: new Icon({src: response.data})});
+          } else if (featureType === "LineString" || featureType === "MultiLineString") {
+            console.log("Implemetar estilo para linhas")
+          } else if (featureType === "Polygon" || featureType === "MultiPolygon") {
+            console.log("Implemetar estilo para Poligono")
+          } else if (featureType === "GeometryCollection") { // Antimeridian Cutting
+            console.log("Implemetar estilo para Poligono")
+          }
         }
       } catch (e) {
         console.log("Houve algum erro durante a requisição. ");
@@ -215,9 +244,19 @@ export class FacadeOL {
     }
 
     async addHyperResourceImageLayer (url) {
+      
+      function insertSlashAtEnd(A_URL){
+        let lastCaracter = A_URL.charAt(A_URL.length-1)
+        if(lastCaracter !== "/")
+          return A_URL+= "/"
+        return A_URL
+      }
+
+      url = insertSlashAtEnd(url)
+
       let coordinates
       try {
-        coordinates = await axios.get(`${url}/envelope/transform/3857&true`) // implementar verificação se a url termina com '/' ou nao antes de colocar a '/' antes de envelope
+        coordinates = await axios.get(`${url}envelope/transform/3857&true`)
       }
       catch(error){
         console.log(' --- Houve algum erro na requisição. --- \n', error)
@@ -226,7 +265,7 @@ export class FacadeOL {
       const extent = coordinates.data.coordinates[0][0].concat(coordinates.data.coordinates[0][2])
       let image_layer =  new ImageLayer({
         source: new ImageStatic({
-          url: `${url}/.png`, // implementar verificação se a url termina com '/' ou nao antes de colocar a '/' antes de .png
+          url: `${url}.png`,
           crossOrigin: '',
           projection: 'EPSG:3857',
           imageExtent: extent

@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Switch from '@material-ui/core/Switch';
+
 import Icon from '@material-ui/core/Icon';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
@@ -17,7 +18,7 @@ import axios from 'axios';
 import { request } from '../utils/requests';
 import { OptionsLayer } from '../utils/LayerResource';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
   },
@@ -28,14 +29,15 @@ const styles = theme => ({
   iconButton: {
     padding: 10,
   }
-});
-function ListLayer(props) {
-  const classes = props
+}));
+
+export default function ListLayer(props) {
+  const classes = useStyles()
   const [ optionsDialogIsOpen, setOptionsDialogIsOpen ] = useState(false)
   const [ optionsLayer, setOptionsLayer ] = useState(new OptionsLayer())
 
   const [ clientJoinDialogIsOpen, setClientJoinDialogIsOpen ] = useState(false)
-  const [ indexOfClickedLayer, setIndexOfClickedLayer ] = useState(0)
+  const [ zIndexOfClickedLayer, setZIndexOfClickedLayer ] = useState(0)
 
   function switchHandleChange(event, is_ckecked) {  
     props.switchSelectedLayerResource(event.target.value, is_ckecked)
@@ -48,9 +50,9 @@ function ListLayer(props) {
     setOptionsLayer(an_optionsLayer)
   }
 
-  function handleClickClientJoinDialog(item) { 
-    console.log(props)
-    setIndexOfClickedLayer(item.layer.values_.zIndex)
+  function handleClickClientJoinDialog(item) {
+    console.log(item)
+    setZIndexOfClickedLayer(item.layer.values_.zIndex)
     requestOptionsLayerInfo(item)
     setClientJoinDialogIsOpen(true)
   }
@@ -103,7 +105,7 @@ function ListLayer(props) {
       />
       <ClientJoinDialog 
         layer={optionsLayer} 
-        indexOfLayer={indexOfClickedLayer}
+        indexOfLayer={zIndexOfClickedLayer}
         getPropertiesFromLayer={props.getPropertiesFromLayer}
         addPropertiesToLayer={props.addPropertiesToLayer} 
         isOpen={clientJoinDialogIsOpen} 
@@ -112,5 +114,3 @@ function ListLayer(props) {
     </div>
   );
 }
-
-export default withStyles(styles)(ListLayer);

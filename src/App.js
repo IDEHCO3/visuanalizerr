@@ -112,7 +112,7 @@ function App(props) {
     async function getUpdatedLayerFromLayersResource(layer_resource_name, is_checked) {
       let a_resource_layer = null
       const arr = layersResource.map( (layer_resource) => {
-          if (layer_resource.name ===  layer_resource_name) {
+          if (layer_resource.name ===  layer_resource_name) { // VERIFICAR SE É CORRETO USAR O NOME AO INVES DE URL PARA VERIFICAÇAO
             layer_resource.activated = is_checked
             a_resource_layer = layer_resource
           }
@@ -159,28 +159,23 @@ function App(props) {
     }
 
     async function addLayerFromHyperResource(a_GeoHyperLayerResource) {
-     
-      if (a_GeoHyperLayerResource.is_image)
-      {
+      
+      if (a_GeoHyperLayerResource.is_image){
         let  image_layer_ol = await facadeOL.addHyperResourceImageLayer(a_GeoHyperLayerResource.iri)  
         a_GeoHyperLayerResource.layer = image_layer_ol
-        let arr = layersResource.concat([a_GeoHyperLayerResource]) 
-        setLayersResource(arr)
-        a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-        return
       } else {
         const response = await request(a_GeoHyperLayerResource.iri);
         const headers = response.headers
         const style_iri = styleFromHeaders(headers)
-        //console.log(style_iri)
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
         a_GeoHyperLayerResource.layer = vector_layer_ol
-        let arr = layersResource.concat([a_GeoHyperLayerResource])
-        
-        setLayersResource(arr)
-        a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-      }  
-      
+      } 
+
+      let arr = layersResource.concat([a_GeoHyperLayerResource]) 
+      // FALHA AO REQUISITAR CAMADAS GRANDES E ACRESCENTAR OUTRAS ANTES DELA CARREGAR - sobrescreve o layersResource com valor errado
+      setLayersResource(arr)
+      //console.log("Tamanho do array no app: " + layersResource.length)
+      a_GeoHyperLayerResource.layer.setZIndex(arr.length)
     }
 
     async function addLayerFromWMS(a_WMSCapabilityLayer) {
@@ -190,9 +185,16 @@ function App(props) {
     }
 
     function getPropertiesFromVectorLayer(indexOfTheLayer) {
-      const propertyList = facadeOL.getPropertiesOfFeaturesFromVectorLayerOnMap(indexOfTheLayer)
+      const featureList = facadeOL.getFeaturesFromVectorLayerOnMap(indexOfTheLayer)
+      const propertyList = facadeOL.getPropertiesFromFeatures(featureList)
+      debugger
       return propertyList
     }
+
+    /*function getPropertiesFromVectorLayer(indexOfTheLayer) {
+      const propertyList = facadeOL.getPropertiesOfFeaturesFromVectorLayerOnMap(indexOfTheLayer)
+      return propertyList
+    }*/
 
     function addPropertiesToVectorLayer(indexOfTheLayer, indexOftheFeature, newProperties) {
       facadeOL.setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties)
@@ -202,7 +204,6 @@ function App(props) {
     useEffect(() => {
       setFacadeOL(new FacadeOL())
       //facadeOL.setPopupInElement(document.getElementById('popup'))
-    
     }, [facadeOL.currentBaseLayerName]) // Only re-run the effect if facadeOL.currentBaseLayerName changes
         
     return (
