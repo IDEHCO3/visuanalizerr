@@ -164,14 +164,14 @@ function App(props) {
         let  image_layer_ol = await facadeOL.addHyperResourceImageLayer(a_GeoHyperLayerResource.iri)  
         a_GeoHyperLayerResource.layer = image_layer_ol
       } else {
-        const response = await request(a_GeoHyperLayerResource.iri);
+        const response = await request(a_GeoHyperLayerResource.iri)
         const headers = response.headers
         const style_iri = styleFromHeaders(headers)
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
         a_GeoHyperLayerResource.layer = vector_layer_ol
       } 
 
-      let arr = layersResource.concat([a_GeoHyperLayerResource]) 
+      let arr = layersResource.concat([a_GeoHyperLayerResource])
       // FALHA AO REQUISITAR CAMADAS GRANDES E ACRESCENTAR OUTRAS ANTES DELA CARREGAR - sobrescreve o layersResource com valor errado
       setLayersResource(arr)
       //console.log("Tamanho do array no app: " + layersResource.length)
@@ -184,20 +184,18 @@ function App(props) {
       setLayersResource(arr)
     }
 
-    function getPropertiesFromVectorLayer(indexOfTheLayer) {
-      const featureList = facadeOL.getFeaturesFromVectorLayerOnMap(indexOfTheLayer)
+    function getPropertiesFromFeatures(featureList) {
       const propertyList = facadeOL.getPropertiesFromFeatures(featureList)
-      debugger
       return propertyList
     }
 
-    /*function getPropertiesFromVectorLayer(indexOfTheLayer) {
-      const propertyList = facadeOL.getPropertiesOfFeaturesFromVectorLayerOnMap(indexOfTheLayer)
-      return propertyList
-    }*/
+    function getFeaturesFromVectorLayerOnMap(ZIndexOfTheLayer) {
+      const featureList = facadeOL.getFeaturesFromVectorLayerOnMap(ZIndexOfTheLayer)
+      return featureList
+    }
 
-    function addPropertiesToVectorLayer(indexOfTheLayer, indexOftheFeature, newProperties) {
-      facadeOL.setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties)
+    function addPropertiesInAFeature(OlFeature, newProperties) {
+      facadeOL.addPropertiesInAFeature(OlFeature, newProperties)
       //console.log(layersResource)
     }
 
@@ -259,8 +257,9 @@ function App(props) {
                       layersResource={layersResource} 
                       deleteSelectedLayerResource={deleteSelectedLayerResource}
                       switchSelectedLayerResource={switchSelectedLayerResource}
-                      getPropertiesFromLayer={getPropertiesFromVectorLayer}
-                      addPropertiesToLayer={addPropertiesToVectorLayer}
+                      getFeaturesFromVectorLayerOnMap={getFeaturesFromVectorLayerOnMap}
+                      getPropertiesFromFeatures={getPropertiesFromFeatures}
+                      addPropertiesInAFeature={addPropertiesInAFeature}
                       addLayerFromHyperResource={addLayerFromHyperResource}
                     />
                   </ExpansionPanelDetails>

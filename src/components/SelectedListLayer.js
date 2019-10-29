@@ -51,7 +51,6 @@ export default function ListLayer(props) {
   }
 
   function handleClickClientJoinDialog(item) {
-    console.log(item)
     setZIndexOfClickedLayer(item.layer.values_.zIndex)
     requestOptionsLayerInfo(item)
     setClientJoinDialogIsOpen(true)
@@ -106,8 +105,9 @@ export default function ListLayer(props) {
       <ClientJoinDialog 
         layer={optionsLayer} 
         indexOfLayer={zIndexOfClickedLayer}
-        getPropertiesFromLayer={props.getPropertiesFromLayer}
-        addPropertiesToLayer={props.addPropertiesToLayer} 
+        getFeaturesFromVectorLayerOnMap={props.getFeaturesFromVectorLayerOnMap}
+        getPropertiesFromFeatures={props.getPropertiesFromFeatures}
+        addPropertiesInAFeature={props.addPropertiesInAFeature}
         isOpen={clientJoinDialogIsOpen} 
         close={closeClientJoinDialog}
       />

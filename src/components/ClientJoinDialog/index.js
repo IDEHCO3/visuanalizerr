@@ -152,7 +152,7 @@ export default function OptionsDialog(props) {
 
   const handleNextStep = () => {
     if(activeStep === steps.length - 1 ){
-      console.log("Jutar dados")
+      console.log("Juntar dados")
       handleAddProperties()
       //handleClose()
     } else {
@@ -239,7 +239,9 @@ export default function OptionsDialog(props) {
   }
 
   async function handleAddProperties() {
-    const propertiesOfFeaturesOnLayer = props.getPropertiesFromLayer(indexOfLayer)
+    
+    let featureList = props.getFeaturesFromVectorLayerOnMap(indexOfLayer)
+    const propertiesOfFeaturesOnLayer = props.getPropertiesFromFeatures(featureList)
     const urlLengthLimit = 1024  
     let url = ''
     console.log(propertiesOfFeaturesOnLayer)
@@ -256,15 +258,10 @@ export default function OptionsDialog(props) {
           Object.keys(apiPropertyObject).forEach( propertyKey => {
             if (propertiesToAddOnLayer.includes(propertyKey)) {
               const IndexOfItem = propertiesOfFeaturesOnLayer.findIndex( propertyObject => propertyObject[selectedLayerProperty] === apiPropertyObject[selectedResourceProperty])
-              
-              console.log(apiPropertyObject)
-              console.log("----")
+              let newProperty = {[propertyKey]: apiPropertyObject[propertyKey]}
+              console.log(newProperty)
+              props.addPropertiesInAFeature(featureList[IndexOfItem], newProperty)
               console.log(propertiesOfFeaturesOnLayer[IndexOfItem])
-              
-              console.log(apiPropertyObject[propertyKey])
-              debugger
-              //props.addPropertiesToLayer(indexOfLayer, )
-              //layer.setProperties({[propKey]: prop[propKey]})
             }
           })
         })

@@ -112,7 +112,7 @@ export class FacadeOL {
     //return a array of features of a vector layer by passing the zIndex of the layer
     getFeaturesFromVectorLayerOnMap(ZIndexOfTheLayer) {
       const layersList = this.map.getLayers().array_
-      let featureList
+      let featureList = []
       if(layersList[ZIndexOfTheLayer].type === "VECTOR"){
         featureList = layersList[ZIndexOfTheLayer].getSource().getFeatures()
       }
@@ -134,7 +134,6 @@ export class FacadeOL {
       const layersList = this.map.getLayers().array_
       const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
       let propretiesList = featureList.map( feature => feature.getProperties() )
-      console.log(propretiesList)
       return propretiesList
     }
 
