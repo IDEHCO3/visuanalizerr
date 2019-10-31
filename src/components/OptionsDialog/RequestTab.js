@@ -230,6 +230,14 @@ export default function RequestTab(props) {
     //item.isImage = !item.isImage
   }
 
+  function hasSampleValueOnExpressionUrl(){
+    if(expressionUrl.includes('{attribute}') || expressionUrl.includes('{value}') || expressionUrl.includes('{operator}') || expressionUrl.includes('{geometry}') ){
+      return true
+    } else {
+      return false
+    }
+  }
+
   function handleClickAddLayer() {
     props.addLayerFromHyperResource(new GeoHyperLayerResource(null, expressionUrl, expressionUrl, null, null, isImage))
     props.closeDialog()
@@ -426,7 +434,7 @@ export default function RequestTab(props) {
                   </Button>
                 }
                 
-                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickAddLayer()}>  
+                <Button variant="contained" color="primary" disabled={hasSampleValueOnExpressionUrl()} className={classes.Button} onClick={() => handleClickAddLayer()}>  
                   <Icon className={classes.marginRight}>queue</Icon> 
                   Adicionar camada 
                 </Button>

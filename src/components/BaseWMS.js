@@ -116,7 +116,11 @@ function BaseWMS(props) {
           </Grid>
         </Grid>
       </FormControl>
-      <ListLayer items={items} selectedItemName={selectedItemName}/>
+      <ListLayer 
+        items={items} 
+        selectedItemName={selectedItemName}
+        type={"WMS"}
+      />
     </div>
 );
 }

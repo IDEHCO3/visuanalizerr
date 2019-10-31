@@ -31,33 +31,39 @@ export class FacadeOL {
       this.popup = new Popup();
       this.map.addOverlay(this.popup);
       this.onClickMap()
-      
     }
+
     // Begins - These operations are related to the baselayer
     //return a null base layer
     nullBaseLayer() {
       return null
     }
+
     //returns a OSM TileLayer as baselayer
     osmBaseLayer() {
         return new TileLayer({ source: new XYZ({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'}), zIndex: 0 })
     }
+
     //returns a google TileLayer as baselayer
     googleBaseLayer() {
       return new TileLayer({source: new XYZ({url: 'http://mt{0-3}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'}), zIndex: 0})
     }
+
     //returns a google satelite TileLayer as baselayer
     sateliteBaseLayer() {
       return new TileLayer({source: new TileImage({ url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}'}), zIndex: 0})
     }
+
     //returns a water TileLayer as baselayer
     watercolorBaseLayer() {
       return new TileLayer({source: new XYZ({url: 'http://{a-c}.tile.stamen.com/watercolor/{z}/{x}/{y}.png'}), zIndex: 0})
     }
+
     //returns wikimedia TileLayer as baselayer
     wikimediaBaseLayer() {
       return new TileLayer({source: new XYZ({url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png'}), zIndex: 0})
     }
+
     //returns a TileLayer based on name(a_baseLayer_name) or null
     baseLayer(a_baseLayer_name) {
       // name: 'Wikimedia', value: 'wikimedia'}, {name: 'Nenhum', value: null}]
@@ -73,6 +79,7 @@ export class FacadeOL {
         }
       return layers[a_baseLayer_name]
     }
+
     setBaseLayer(a_baseLayer_name) {
       this.map.removeLayer(this.currentBaseLayer)
       if (!a_baseLayer_name)
@@ -82,22 +89,62 @@ export class FacadeOL {
       this.map.addLayer(this.currentBaseLayer)
       this.currentBaseLayer.setZIndex(0);
     }
+
     // Ends - These operations above are related to the baselayer
     // Begins - These operations are related to the WMS
     getWMSCapabilitiesAsJSON(resquestedXml) {
       let  parser = new WMSCapabilities()
       return parser.read(resquestedXml)
     }
+
     getWMSCapabilityLayers(requestedXml) {
       let capability_json = this.getWMSCapabilitiesAsJSON(requestedXml)
       let layers = capability_json.Capability.Layer.Layer
       
       return layers.map((a_layer) => new WMSCapabilityLayer(a_layer, capability_json.version, capability_json.Service.OnlineResource))
     }
+
     getWMSMap(wmsLayer) {
       let wmsSource = new ImageWMS({url: wmsLayer.entryPoint +'/wms', params: {'LAYERS': wmsLayer.name}})
       return new ImageLayer({extent: wmsLayer.bbox, source: wmsSource})
     }
+
+    //return a array of features of a vector layer by passing the zIndex of the layer
+    getFeaturesFromVectorLayerOnMap(ZIndexOfTheLayer) {
+      const layersList = this.map.getLayers().array_
+      let featureList = []
+      if(layersList[ZIndexOfTheLayer].type === "VECTOR"){
+        featureList = layersList[ZIndexOfTheLayer].getSource().getFeatures()
+      }
+      return featureList
+    }
+
+    //return a array of objects with the features propreties by passing a array of features
+    getPropertiesFromFeatures(featureList) {
+      return featureList.map( feature => feature.getProperties() )
+    }
+
+    //recive a feature(OL gerated) object and a object with the new Properties and add this properties to the feature 
+    addPropertiesInAFeature(OlFeature, newProperties) {
+      OlFeature.setProperties(newProperties)
+    }
+
+    //return a array of objects with the features propreties of a vector layer by passing the zIndex of the layer
+    getPropertiesOfFeaturesFromVectorLayerOnMap(indexOfTheLayer) {
+      const layersList = this.map.getLayers().array_
+      const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
+      let propretiesList = featureList.map( feature => feature.getProperties() )
+      return propretiesList
+    }
+
+    // Sets a collection of key-value pairs on feature. Note that this changes any existing properties and adds new ones (it does not remove any existing properties).
+    setPropertiesOnFeaturesFromVectorLayerOnMap(indexOfTheLayer, indexOftheFeature, newProperties) {
+      const layersList = this.map.getLayers().array_
+      const featureList = layersList[indexOfTheLayer].getSource().getFeatures()
+      featureList[indexOftheFeature].setProperties(newProperties)
+      //console.log(featureList[indexOftheFeature].getProperties())
+    } 
+
     addWMSLayer(wmsLayer) {
       let image_layer = this.getWMSMap(wmsLayer)
       this.map.addLayer(image_layer)
@@ -123,7 +170,7 @@ export class FacadeOL {
               
       if (feature) {
         let str = ''
-        const entries = Object.entries(feature.values_)  
+        const entries = Object.entries(feature.values_)
         
         entries.forEach(entry => {
           let key = entry[0];
@@ -150,7 +197,6 @@ export class FacadeOL {
         let layer = null
         let feature = this.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) { return feature})  
         this.displayFeatureInfo(evt, feature, layer)
-        
       })
     }
     // End - events
@@ -161,34 +207,54 @@ export class FacadeOL {
     //}
 
     async addVectorLayerFromGeoJSON(geoJson, style_iri) {
-      let style = null
-      
-       try { 
-          if (style_iri) {
-            let response = await request(style_iri)
+      let style = null 
+
+      try { 
+        if (style_iri) {
+          let response = await request(style_iri)
+          const featureType = geoJson.features[0].geometry.type
+          
+          if(featureType === "Point" || featureType === "MultiPoint"){ // verificar se estar funcionando corretamente os estilos para cada tipo de dado
             style = await new Style({ image: new Icon({src: response.data})});
+          } else if (featureType === "LineString" || featureType === "MultiLineString") {
+            console.log("Implemetar estilo para linhas")
+          } else if (featureType === "Polygon" || featureType === "MultiPolygon") {
+            console.log("Implemetar estilo para Poligono")
+          } else if (featureType === "GeometryCollection") { // Antimeridian Cutting
+            console.log("Implemetar estilo para Poligono")
           }
-            
-        } catch (e) {
-       
-          console.log("Houve algum erro durante a requisição. ");
-          console.log(style_iri);
-          console.log(e);
+        }
+      } catch (e) {
+        console.log("Houve algum erro durante a requisição. ");
+        console.log(style_iri);
+        console.log(e);
       } finally {
-          const gjson_format = new GeoJSON().readFeatures(geoJson, {featureProjection: this.map.getView().getProjection()})
-          const vector_source = new Vector({features: gjson_format})
-          const vector_layer = new VectorLayer({ renderMode: 'image', source: vector_source })
-          if (style)
-            vector_layer.setStyle(style)
-          this.map.addLayer(vector_layer)
-          return vector_layer
+        const gjson_format = new GeoJSON().readFeatures(geoJson, {featureProjection: this.map.getView().getProjection()})
+
+        const vector_source = new Vector({features: gjson_format})
+        const vector_layer = new VectorLayer({ renderMode: 'image', source: vector_source })
+
+        if (style)
+          vector_layer.setStyle(style)
+        this.map.addLayer(vector_layer)
+        return vector_layer
       }
     }
 
     async addHyperResourceImageLayer (url) {
+      
+      function insertSlashAtEnd(A_URL){
+        let lastCaracter = A_URL.charAt(A_URL.length-1)
+        if(lastCaracter !== "/")
+          return A_URL+= "/"
+        return A_URL
+      }
+
+      url = insertSlashAtEnd(url)
+
       let coordinates
       try {
-        coordinates = await axios.get(`${url}/envelope/transform/3857&true`) // implementar verificação se a url termina com '/' ou nao antes de colocar a '/' antes de envelope
+        coordinates = await axios.get(`${url}envelope/transform/3857&true`)
       }
       catch(error){
         console.log(' --- Houve algum erro na requisição. --- \n', error)
@@ -197,7 +263,7 @@ export class FacadeOL {
       const extent = coordinates.data.coordinates[0][0].concat(coordinates.data.coordinates[0][2])
       let image_layer =  new ImageLayer({
         source: new ImageStatic({
-          url: `${url}/.png`, // implementar verificação se a url termina com '/' ou nao antes de colocar a '/' antes de .png
+          url: `${url}.png`,
           crossOrigin: '',
           projection: 'EPSG:3857',
           imageExtent: extent

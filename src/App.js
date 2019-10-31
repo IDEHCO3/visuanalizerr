@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { FacadeOL } from './utils/facade_openlayers.js';
 import Fab from '@material-ui/core/Fab';
 import Drawer from '@material-ui/core/Drawer';
@@ -20,29 +20,16 @@ import BaseWMS from './components/BaseWMS';
 import SelectedListLayer from './components/SelectedListLayer';
 import {request} from './utils/requests';
 
-const styles = theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },  
-  formControl: {
-      margin: 10,
-      minWidth: 120,
+const drawerWidth = "30%";
+const useStyles = makeStyles( () => ({
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
   },
-  selectEmpty: {
-      marginTop: 10,
-  },
-  textField: {
-    marginLeft: 10,
-    marginRight: 10,
-    width: 200,
-  },
-  icon: {
-    margin: 10,
-    fontSize: 32,
-  },
-});
+  drawerPaper: {
+    width: drawerWidth,
+  }
+}))
 
 const ExpansionPanel = withStyles({
   root: {
@@ -85,8 +72,8 @@ const ExpansionPanelDetails = withStyles(theme => ({
   },
 }))(MuiExpansionPanelDetails);
 
-function App(props) {
-    const classes = props;
+export default function App() {
+    const classes = useStyles();
     const [facadeOL, setFacadeOL] = useState(new FacadeOL());
     const [drawerIsOpen, setDrawerIsOpen] = useState(true);
     const [layersResource, setLayersResource] = useState([]);
@@ -97,27 +84,22 @@ function App(props) {
       let temporaryIsExpanded = expanded.slice(0);
       temporaryIsExpanded[position] = !temporaryIsExpanded[position]
       setExpanded(temporaryIsExpanded);
-    };
-    
-    function buttonClicked(e)    {
-      setDrawerIsOpen(!drawerIsOpen)
-      //console.log(e)
-    };
+    }
     
     function baseLayerChanged(value) {
       facadeOL.setBaseLayer(value);
-    };
+    }
 
     function deleteSelectedLayerResource(a_resource_layer) {
       let arr = layersResource.filter(layer =>  layer !== a_resource_layer);
       setLayersResource(arr)
       facadeOL.map.removeLayer(a_resource_layer.layer)
-    };
+    }
 
     async function getUpdatedLayerFromLayersResource(layer_resource_name, is_checked) {
       let a_resource_layer = null
       const arr = layersResource.map( (layer_resource) => {
-          if (layer_resource.name ===  layer_resource_name) {
+          if (layer_resource.name ===  layer_resource_name) { // VERIFICAR SE É CORRETO USAR O NOME AO INVES DE URL PARA VERIFICAÇAO
             layer_resource.activated = is_checked
             a_resource_layer = layer_resource
           }
@@ -125,7 +107,7 @@ function App(props) {
       })
       setLayersResource(arr)
       return a_resource_layer
-    };
+    }
 
     async function switchSelectedLayerResource(layer_resource_name, is_checked) {
       let a_resource_layer = await getUpdatedLayerFromLayersResource(layer_resource_name, is_checked)
@@ -137,7 +119,7 @@ function App(props) {
         facadeOL.map.addLayer(a_resource_layer.layer)
       else
         facadeOL.map.removeLayer(a_resource_layer.layer)
-    };
+    }
 
     function extractIRIFromLinkHeaders(name_in_the_link, headers) {
       const link = headers.link
@@ -161,57 +143,71 @@ function App(props) {
 
     function styleFromHeaders(headers) {
       return extractIRIFromLinkHeaders('stylesheet', headers)
-    };
+    }
 
     async function addLayerFromHyperResource(a_GeoHyperLayerResource) {
       
-      if (a_GeoHyperLayerResource.is_image)
-      {
+      if (a_GeoHyperLayerResource.is_image){
         let  image_layer_ol = await facadeOL.addHyperResourceImageLayer(a_GeoHyperLayerResource.iri)  
         a_GeoHyperLayerResource.layer = image_layer_ol
-        let arr = layersResource.concat([a_GeoHyperLayerResource]) 
-        setLayersResource(arr)
-        a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-        return
       } else {
-        const response = await request(a_GeoHyperLayerResource.iri);
+        const response = await request(a_GeoHyperLayerResource.iri)
         const headers = response.headers
         const style_iri = styleFromHeaders(headers)
-        //console.log(style_iri)
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
         a_GeoHyperLayerResource.layer = vector_layer_ol
-        let arr = layersResource.concat([a_GeoHyperLayerResource]) 
-        setLayersResource(arr)
-        a_GeoHyperLayerResource.layer.setZIndex(arr.length)
-        //console.log(layersResource)
-      }  
-      
-    };
+      } 
+
+      let arr = layersResource.concat([a_GeoHyperLayerResource])
+      // FALHA AO REQUISITAR CAMADAS GRANDES E ACRESCENTAR OUTRAS ANTES DELA CARREGAR - sobrescreve o layersResource com valor errado
+      setLayersResource(arr)
+      //console.log("Tamanho do array no app: " + layersResource.length)
+      a_GeoHyperLayerResource.layer.setZIndex(arr.length)
+    }
 
     async function addLayerFromWMS(a_WMSCapabilityLayer) {
       let  wms_layer =  facadeOL.addWMSLayer(a_WMSCapabilityLayer)
       let arr = layersResource.concat([wms_layer]) 
       setLayersResource(arr)
-      
-    };
-    
+    }
+
+    function getPropertiesFromFeatures(featureList) {
+      const propertyList = facadeOL.getPropertiesFromFeatures(featureList)
+      return propertyList
+    }
+
+    function getFeaturesFromVectorLayerOnMap(ZIndexOfTheLayer) {
+      const featureList = facadeOL.getFeaturesFromVectorLayerOnMap(ZIndexOfTheLayer)
+      return featureList
+    }
+
+    function addPropertiesInAFeature(OlFeature, newProperties) {
+      facadeOL.addPropertiesInAFeature(OlFeature, newProperties)
+      //console.log(layersResource)
+    }
+
     useEffect(() => {
       setFacadeOL(new FacadeOL())
       //facadeOL.setPopupInElement(document.getElementById('popup'))
-    
-    }, [facadeOL.currentBaseLayerName]); // Only re-run the effect if facadeOL.currentBaseLayerName changes
+    }, [facadeOL.currentBaseLayerName]) // Only re-run the effect if facadeOL.currentBaseLayerName changes
         
     return (
         
         <div>
           <div id="map" style={{position: "fixed", width: "100%", height: "100%",  bottom: 0, zindex: 0 }}><div id="popup" ref = {popupElementRef} ></div></div>
-          <Fab color="primary" aria-label="Add"  size="small" style = {{position: "fixed", top: 25}}  onClick={buttonClicked}  >
+          <Fab color="primary" aria-label="Add"  size="small" style = {{position: "fixed", top: 25}}  onClick={() => setDrawerIsOpen(!drawerIsOpen)}  >
               <TouchAppIcon />
           </Fab>
                     
-          <Drawer open={drawerIsOpen} variant="persistent">
+          <Drawer 
+            open={drawerIsOpen} 
+            variant="persistent" 
+            classes={{
+            paper: classes.drawerPaper,
+            }}
+          >
               <div >
-                <IconButton onClick={(e) => setDrawerIsOpen(!drawerIsOpen)}>
+                <IconButton onClick={() => setDrawerIsOpen(!drawerIsOpen)}>
                   {<ChevronLeftIcon />}
                 </IconButton>
               </div>
@@ -254,7 +250,11 @@ function App(props) {
                       layersResource={layersResource} 
                       deleteSelectedLayerResource={deleteSelectedLayerResource}
                       switchSelectedLayerResource={switchSelectedLayerResource}
-                    /> 
+                      getFeaturesFromVectorLayerOnMap={getFeaturesFromVectorLayerOnMap}
+                      getPropertiesFromFeatures={getPropertiesFromFeatures}
+                      addPropertiesInAFeature={addPropertiesInAFeature}
+                      addLayerFromHyperResource={addLayerFromHyperResource}
+                    />
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               </div>
@@ -264,5 +264,3 @@ function App(props) {
       )
       
 }    
-
-export default  withStyles(styles)(App);

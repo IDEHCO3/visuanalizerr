@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { Tooltip } from '@material-ui/core';
 import { request } from './../utils/requests';
 import { GeoHyperLayerResource } from './../utils/LayerResource';
 import ListLayer from './ListLayer';
 
 import { InputLabel, MenuItem, FormControl, Select } from '@material-ui/core'; //Select Components
-import { Paper, InputBase, Divider, IconButton } from '@material-ui/core'; // Text input components
+import { Paper, InputBase, Divider, IconButton, Tooltip } from '@material-ui/core'; // Text input components
 
 const useStyles = makeStyles( theme => ({
   buttonGroup: {
@@ -97,10 +97,13 @@ export default function BaseHyperResource(props) {
   }
 
   return (
-    <div>
-      <Typography variant="h6">Urls de entrada </Typography>
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6">Urls de entrada </Typography>
+      </Grid>
+      <Grid item xs={12}>
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="age-simple">APIs Pré Definidas</InputLabel>
+        <InputLabel htmlFor="age-simple">Serviços mais utilizados</InputLabel>
         <Select
           value={text_url}
           onChange={selectHandleChange}
@@ -110,12 +113,13 @@ export default function BaseHyperResource(props) {
           <MenuItem value={""}></MenuItem>
           <MenuItem value={"http://ggt-des.ibge.gov.br/api/bcim/"}>Base Cartográfica Contínua do Brasil ao Milionésimo-IBGE</MenuItem>
           <MenuItem value={"http://ggt-des.ibge.gov.br/api/osm-2017-06/"}>Base vetorial do OpenStreetMap de 2017-06</MenuItem>
-          <MenuItem value={"http://ggt-des.ibge.gov.br/api/munic-2015/"}>Munic 2015</MenuItem>
           <MenuItem value={"http://ggt-des.ibge.gov.br/api/ibge/geografia/atlas/demografico/2010/"}>Atlas Demográfico 2010</MenuItem>
           <MenuItem value={"http://ggt-des.ibge.gov.br/api/ibge/recursos-naturais/cobertura-uso-terra/"}>CREN - Cobertura de terra</MenuItem>
         </Select>
       </FormControl>
+      </Grid>
 
+      <Grid item xs={12}>
       <Paper className={classes.root}>
         <InputBase
           className={classes.input}
@@ -136,8 +140,15 @@ export default function BaseHyperResource(props) {
           </IconButton>
         </Tooltip>      
       </Paper>
-      
-      <ListLayer items={items} selectedItemName={selectedItemName} addLayerFromHyperResource={props.addLayerFromHyperResource}/>
-    </div>
+      </Grid>
+      <Grid item xs={12}>
+      <ListLayer 
+        items={items} 
+        selectedItemName={selectedItemName} 
+        addLayerFromHyperResource={props.addLayerFromHyperResource}
+        type={'HypeResource'}
+      />
+      </Grid>
+    </Grid>
   );
 }

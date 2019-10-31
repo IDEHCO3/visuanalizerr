@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -87,7 +88,22 @@ export default function ListLayer(props) {
           </ListItem>
         ))}  
       </List>
-      <OptionsDialog layer={optionsLayer} isOpen={optionsDialogIsOpen} close={closeOptionsDialog} addLayerFromHyperResource={props.addLayerFromHyperResource}/>
+      { props.type === "HypeResource" ? 
+        <OptionsDialog 
+          layer={optionsLayer} 
+          isOpen={optionsDialogIsOpen} 
+          close={closeOptionsDialog} 
+          addLayerFromHyperResource={props.addLayerFromHyperResource}
+        /> 
+        :
+        <div/>
+      }
+      
     </div>
   );
 }
+
+ListLayer.propTypes = {
+  items: PropTypes.any.isRequired,
+  type: PropTypes.any.isRequired,
+};
