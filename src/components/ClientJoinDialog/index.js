@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
-import { Box, Paper } from '@material-ui/core';
-import { List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Slide from '@material-ui/core/Slide';
+import React, { useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
+import { makeStyles } from '@material-ui/core/styles'
+import { Box, Paper } from '@material-ui/core'
+import { List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core'
+import Dialog from '@material-ui/core/Dialog'
+import AppBar from '@material-ui/core/AppBar'
+import Toolbar from '@material-ui/core/Toolbar'
+import Grid from '@material-ui/core/Grid'
+import Typography from '@material-ui/core/Typography'
+import Slide from '@material-ui/core/Slide'
 import { InputBase, Divider, Tooltip } from '@material-ui/core'; // Text input components
-import { Stepper, Step, StepLabel } from '@material-ui/core';
-import { Button, IconButton, Radio, Checkbox } from '@material-ui/core';
-import TreeView from '@material-ui/lab/TreeView';
-import TreeItem from '@material-ui/lab/TreeItem';
+import { Stepper, Step, StepLabel } from '@material-ui/core'
+import { Button, IconButton, Radio, Checkbox } from '@material-ui/core'
+import TreeView from '@material-ui/lab/TreeView'
+import TreeItem from '@material-ui/lab/TreeItem'
 
-//import { green } from '@material-ui/core/colors';
-import SearchIcon from '@material-ui/icons/Search';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import SearchIcon from '@material-ui/icons/Search'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack'
+import CheckCircleIcon from '@material-ui/icons/CheckCircle'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 
-import axios from 'axios';
-import { request } from '../../utils/requests';
-import { OptionsLayer } from '../../utils/LayerResource';
+import axios from 'axios'
+import { request } from '../../utils/requests'
+import { OptionsLayer } from '../../utils/LayerResource'
+import FinishDialog from './FinishDialog'
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -98,10 +98,10 @@ TabPanel.propTypes = {
 };
 
 function getSteps() {
-  return ['Escolher atributo da camada',
+  return [
+  'Escolher atributo da camada',
   'Escolher serviço para junção', 
-  'Escolher atributo do serviço',
-  'Escolher atributos para serem adicionados na camada'
+  'Escolher atributo do serviço e atributos para serem adicionados na camada'
   ];
 }
 
@@ -112,9 +112,7 @@ function getStepContent(stepIndex) {
     case 1:
       return 'Escolha o serviço com recurso de dados não espaciais para junção';
     case 2:
-      return 'Escolha um atributo do serviço para junção, lembrando que os valores desse atributo devem ser iguais aos da camada';
-    case 3:
-      return 'Escolha os novos atributos que serão adicionados na camada';
+      return 'Escolha um atributo do serviço para junção, lembrando que os valores desse atributo devem ser iguais aos da camada e os novos atributos que serão adicionados na camada';
     default:
       return 'Uknown stepIndex';
   }
@@ -141,8 +139,10 @@ export default function OptionsDialog(props) {
 
   const [ resourcePropertiesList, setResourcePropertiesList ] = useState([])
   const [ selectedResourceProperty, setSelectedResourceProperty ] = useState('')
-
   const [ propertiesToAddOnLayer, setPropertiesToAddOnLayer ] = useState([])
+
+  const [ finishDialogIsOpen, setFinishDialogIsOpen ] = useState(false)
+  const [ joinSuccess, setJoinSuccess ] = useState(false)
 
   useEffect(() => {
     if(layer.jsonOptions){
@@ -152,9 +152,9 @@ export default function OptionsDialog(props) {
 
   const handleNextStep = () => {
     if(activeStep === steps.length - 1 ){
-      console.log("Juntar dados")
       handleAddProperties()
-      //handleClose()
+      setFinishDialogIsOpen(true)
+      props.close()
     } else {
       setActiveStep(prevActiveStep => prevActiveStep + 1)
     }
@@ -162,10 +162,6 @@ export default function OptionsDialog(props) {
 
   const handleBackStep = () => { 
     setActiveStep(prevActiveStep => prevActiveStep - 1)
-  }
-
-  function handleClose() {
-    props.close()
   }
 
   function HandleChangeOnApiUrl(e) {
@@ -213,7 +209,6 @@ export default function OptionsDialog(props) {
   }
 
   function handleClickOnCheckBox(property) {
-
     let temporaryPropertyList = propertiesToAddOnLayer.slice(0)
     
     if (temporaryPropertyList.includes(property)){
@@ -225,60 +220,89 @@ export default function OptionsDialog(props) {
     setPropertiesToAddOnLayer(temporaryPropertyList)
   }
 
+  function handleClickOnSelectAllCheckBox(propertyList) {
+    let temporaryPropertyToAddList = propertiesToAddOnLayer.slice(0)
+    if (propertyList.length === temporaryPropertyToAddList.length){
+      setPropertiesToAddOnLayer([])
+    } else if (propertyList.length > temporaryPropertyToAddList.length) {
+      propertyList.forEach( property => {
+        if(!temporaryPropertyToAddList.includes(property["hydra:property"])){
+          temporaryPropertyToAddList.push(property["hydra:property"])
+        }
+      })
+      setPropertiesToAddOnLayer(temporaryPropertyToAddList)
+    }
+
+  }
+
   function nextStepIsDisable(){
     if (activeStep === 0 && selectedLayerProperty === '')
       return true
     else if(activeStep === 1 && urlIsValid === false)
       return true
-    else if(activeStep === 2 && selectedResourceProperty === '')
-      return true
-    else if(activeStep === 3 && propertiesToAddOnLayer.length < 1)
+    else if(activeStep === 2 && ( selectedResourceProperty === ''  || propertiesToAddOnLayer.length < 1))
       return true
     else
       return false
   }
 
   async function handleAddProperties() {
+
+    function generateUrlList(urlLengthLimit){
+      let url = ""
+      let urlList = []
+      for( let i = 0; i < propertiesOfFeaturesOnLayer.length; i++ ){
+        if( url.length === 0 ){
+          url = `${apiUrl}/filter/${selectedResourceProperty}/in/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`
+        } else if ( url.length > 0 && (url + `/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`).length <= urlLengthLimit ) {
+          url+= `&${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}` 
+        } else if ( (url + `/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`).length > urlLengthLimit ) {
+          urlList.push(url)
+          url = `${apiUrl}/filter/${selectedResourceProperty}/in/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`
+        }
+      }
+
+      let lastItem = urlList[urlList.length - 1]
+      if(url !== lastItem){
+        urlList.push(url)
+      }
+
+      return urlList
+    }
     
     let featureList = props.getFeaturesFromVectorLayerOnMap(indexOfLayer)
     const propertiesOfFeaturesOnLayer = props.getPropertiesFromFeatures(featureList)
-    const urlLengthLimit = 1024  
-    let url = ''
-    console.log(propertiesOfFeaturesOnLayer)
-    for( let i = 0; i < propertiesOfFeaturesOnLayer.length; i++ ){
-      if( url.length === 0 ){
-        url = `${apiUrl}/filter/${selectedResourceProperty}/in/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`
-      } else if ( url.length > 0 && (url + `/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`).length <= urlLengthLimit ) {
-        url+= `&${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}` 
-      } else if ( (url + `/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`).length > urlLengthLimit ) {
-        
-        let response = await request(url)
-        
+    const urlList = generateUrlList(1024)
+
+    for(let url in urlList){
+      let response = await request(urlList[url])
+      
+      if (response === undefined || response.data.length === 0 ){
+        setJoinSuccess(false)
+        break
+      } else {
+        setJoinSuccess(true)
         response.data.forEach( apiPropertyObject => {
           Object.keys(apiPropertyObject).forEach( propertyKey => {
             if (propertiesToAddOnLayer.includes(propertyKey)) {
               const IndexOfItem = propertiesOfFeaturesOnLayer.findIndex( propertyObject => propertyObject[selectedLayerProperty] === apiPropertyObject[selectedResourceProperty])
               let newProperty = {[propertyKey]: apiPropertyObject[propertyKey]}
-              console.log(newProperty)
               props.addPropertiesInAFeature(featureList[IndexOfItem], newProperty)
-              console.log(propertiesOfFeaturesOnLayer[IndexOfItem])
             }
           })
         })
-        
-        
-                
-        url = `${apiUrl}/filter/${selectedResourceProperty}/in/${propertiesOfFeaturesOnLayer[i][selectedLayerProperty]}`
       }
     }
+  
+    
   }
 
   return (
     <div>
-      <Dialog fullScreen open={isOpen} onClose={handleClose} TransitionComponent={Transition}>
+      <Dialog fullScreen open={isOpen} onClose={() => props.close()} TransitionComponent={Transition}>
         <AppBar className={classes.appBar}>
           <Toolbar>
-            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+            <IconButton edge="start" color="inherit" onClick={() => props.close()} aria-label="close">
               <ArrowBackIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}>
@@ -392,6 +416,17 @@ export default function OptionsDialog(props) {
             <TabPanel value={activeStep} index={2}>                                                 {/* THIRD STEP */}
               <Paper className={classes.LayerPropertyesContainer}> 
                 <List dense={false}>
+                  <ListItem button >
+                    <ListItemSecondaryAction>
+                      <ListItemText primary={"    "} />
+                      <Tooltip title="Selecionar todas">
+                        <Checkbox
+                          checked={resourcePropertiesList.length === propertiesToAddOnLayer.length}
+                          onChange={() => handleClickOnSelectAllCheckBox(resourcePropertiesList)}
+                        />
+                      </Tooltip>                         
+                    </ListItemSecondaryAction>
+                  </ListItem>   
                 { resourcePropertiesList.map( (property, index) => (
                   <ListItem button key={index}>
 
@@ -402,35 +437,18 @@ export default function OptionsDialog(props) {
                         checked={selectedResourceProperty === property["hydra:property"]}
                         onChange={(event) => setSelectedResourceProperty(event.target.value)}
                         value={property["hydra:property"]}
-                      />                       
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-                </List>
-              </Paper>
-            </TabPanel>
-
-            <TabPanel value={activeStep} index={3}>                                                 {/* FOURTH STEP */}
-              <Paper className={classes.LayerPropertyesContainer}> 
-                <List dense={false}>
-                { resourcePropertiesList.map( (property, index) => (
-                  <ListItem button key={index}>
-
-                    <ListItemText primary={property["hydra:property"]} />
-
-                    <ListItemSecondaryAction>
+                      />
                       <Checkbox
                         checked={propertiesToAddOnLayer.includes(property["hydra:property"])}
                         onChange={() => handleClickOnCheckBox(property["hydra:property"])}
-                      />                     
+                      />                         
                     </ListItemSecondaryAction>
                   </ListItem>
                 ))}
                 </List>
               </Paper>
             </TabPanel>
-
-            
+ 
           </div>
         </div>
         <div className={classes.stepControlerButtons}>
@@ -446,6 +464,11 @@ export default function OptionsDialog(props) {
           </Button>
         </div>
       </Dialog>
+      <FinishDialog 
+        success={joinSuccess}
+        isOpen={finishDialogIsOpen} 
+        close={() => setFinishDialogIsOpen(false)}
+      />
     </div>
   );
 }

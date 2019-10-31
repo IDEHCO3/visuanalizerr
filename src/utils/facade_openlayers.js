@@ -206,7 +206,7 @@ export class FacadeOL {
     //  return new HyperResourceLayer(name, iri);
     //}
 
-    async addVectorLayerFromGeoJSON(geoJson, style_iri) { //fazer verificação pro tipo de feature do geoJson e aplicar o estilo de forma diferente para cada tipo (linha, ponto e poligono)
+    async addVectorLayerFromGeoJSON(geoJson, style_iri) {
       let style = null 
 
       try { 
@@ -214,7 +214,7 @@ export class FacadeOL {
           let response = await request(style_iri)
           const featureType = geoJson.features[0].geometry.type
           
-          if(featureType === "Point" || featureType === "MultiPoint"){
+          if(featureType === "Point" || featureType === "MultiPoint"){ // verificar se estar funcionando corretamente os estilos para cada tipo de dado
             style = await new Style({ image: new Icon({src: response.data})});
           } else if (featureType === "LineString" || featureType === "MultiLineString") {
             console.log("Implemetar estilo para linhas")
@@ -230,7 +230,6 @@ export class FacadeOL {
         console.log(e);
       } finally {
         const gjson_format = new GeoJSON().readFeatures(geoJson, {featureProjection: this.map.getView().getProjection()})
-        //gjson_format.forEach((item) => console.log(item.getProperties()))
 
         const vector_source = new Vector({features: gjson_format})
         const vector_layer = new VectorLayer({ renderMode: 'image', source: vector_source })
