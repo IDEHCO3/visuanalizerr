@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { FacadeOL } from './utils/facade_openlayers.js';
 import Fab from '@material-ui/core/Fab';
 import Drawer from '@material-ui/core/Drawer';
@@ -20,29 +20,16 @@ import BaseWMS from './components/BaseWMS';
 import SelectedListLayer from './components/SelectedListLayer';
 import {request} from './utils/requests';
 
-const styles = theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },  
-  formControl: {
-      margin: 10,
-      minWidth: 120,
+const drawerWidth = "30%";
+const useStyles = makeStyles( () => ({
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
   },
-  selectEmpty: {
-      marginTop: 10,
-  },
-  textField: {
-    marginLeft: 10,
-    marginRight: 10,
-    width: 200,
-  },
-  icon: {
-    margin: 10,
-    fontSize: 32,
-  },
-});
+  drawerPaper: {
+    width: drawerWidth,
+  }
+}))
 
 const ExpansionPanel = withStyles({
   root: {
@@ -85,8 +72,8 @@ const ExpansionPanelDetails = withStyles(theme => ({
   },
 }))(MuiExpansionPanelDetails);
 
-function App(props) {
-    const classes = props;
+export default function App() {
+    const classes = useStyles();
     const [facadeOL, setFacadeOL] = useState(new FacadeOL());
     const [drawerIsOpen, setDrawerIsOpen] = useState(true);
     const [layersResource, setLayersResource] = useState([]);
@@ -212,7 +199,13 @@ function App(props) {
               <TouchAppIcon />
           </Fab>
                     
-          <Drawer open={drawerIsOpen} variant="persistent">
+          <Drawer 
+            open={drawerIsOpen} 
+            variant="persistent" 
+            classes={{
+            paper: classes.drawerPaper,
+            }}
+          >
               <div >
                 <IconButton onClick={() => setDrawerIsOpen(!drawerIsOpen)}>
                   {<ChevronLeftIcon />}
@@ -271,5 +264,3 @@ function App(props) {
       )
       
 }    
-
-export default  withStyles(styles)(App);
