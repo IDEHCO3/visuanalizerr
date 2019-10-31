@@ -153,11 +153,19 @@ export default function OptionsDialog(props) {
   const handleNextStep = () => {
     if(activeStep === steps.length - 1 ){
       handleAddProperties()
-      setFinishDialogIsOpen(true)
-      props.close()
+      handleClose()
     } else {
       setActiveStep(prevActiveStep => prevActiveStep + 1)
     }
+  }
+
+  function handleClose(){
+    setActiveStep(0)
+    setSelectedLayerProperty('')
+    setApiUrl('')
+    setSelectedResourceProperty('')
+    setPropertiesToAddOnLayer([])
+    props.close()
   }
 
   const handleBackStep = () => { 
@@ -293,16 +301,15 @@ export default function OptionsDialog(props) {
         })
       }
     }
-  
-    
+    setFinishDialogIsOpen(true)
   }
 
   return (
     <div>
-      <Dialog fullScreen open={isOpen} onClose={() => props.close()} TransitionComponent={Transition}>
+      <Dialog fullScreen open={isOpen} onClose={() => handleClose()} TransitionComponent={Transition}>
         <AppBar className={classes.appBar}>
           <Toolbar>
-            <IconButton edge="start" color="inherit" onClick={() => props.close()} aria-label="close">
+            <IconButton edge="start" color="inherit" onClick={() => handleClose()} aria-label="close">
               <ArrowBackIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}>
@@ -418,7 +425,7 @@ export default function OptionsDialog(props) {
                 <List dense={false}>
                   <ListItem button >
                     <ListItemSecondaryAction>
-                      <ListItemText primary={"    "} />
+                      <ListItemText primary={"  "} />
                       <Tooltip title="Selecionar todas">
                         <Checkbox
                           checked={resourcePropertiesList.length === propertiesToAddOnLayer.length}
