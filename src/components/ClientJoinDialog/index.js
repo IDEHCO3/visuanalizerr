@@ -426,7 +426,7 @@ export default function OptionsDialog(props) {
                   <ListItem button >
                     <ListItemSecondaryAction>
                       <ListItemText primary={"  "} />
-                      <Tooltip title="Selecionar todas">
+                      <Tooltip title="Selecionar todos">
                         <Checkbox
                           checked={resourcePropertiesList.length === propertiesToAddOnLayer.length}
                           onChange={() => handleClickOnSelectAllCheckBox(resourcePropertiesList)}
@@ -440,15 +440,19 @@ export default function OptionsDialog(props) {
                     <ListItemText primary={property["hydra:property"]} />
 
                     <ListItemSecondaryAction>
-                      <Radio
-                        checked={selectedResourceProperty === property["hydra:property"]}
-                        onChange={(event) => setSelectedResourceProperty(event.target.value)}
-                        value={property["hydra:property"]}
-                      />
-                      <Checkbox
-                        checked={propertiesToAddOnLayer.includes(property["hydra:property"])}
-                        onChange={() => handleClickOnCheckBox(property["hydra:property"])}
-                      />                         
+                      <Tooltip title="Atributo para junção" >
+                        <Radio
+                          checked={selectedResourceProperty === property["hydra:property"]}
+                          onChange={(event) => setSelectedResourceProperty(event.target.value)}
+                          value={property["hydra:property"]}
+                        />
+                      </Tooltip>
+                      <Tooltip title="Adicionar atrubito na camada" >
+                        <Checkbox
+                          checked={propertiesToAddOnLayer.includes(property["hydra:property"])}
+                          onChange={() => handleClickOnCheckBox(property["hydra:property"])}
+                        />
+                      </Tooltip>                         
                     </ListItemSecondaryAction>
                   </ListItem>
                 ))}
