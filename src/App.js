@@ -18,7 +18,7 @@ import BaseLayer from './components/BaseLayer';
 import BaseHyperResource from './components/BaseHyperResource';
 import BaseWMS from './components/BaseWMS';
 import SelectedListLayer from './components/SelectedListLayer';
-import {request} from './utils/requests';
+import {requestGeobuf} from './utils/requests';
 
 const drawerWidth = "30%";
 const useStyles = makeStyles( () => ({
@@ -122,23 +122,25 @@ export default function App() {
     }
 
     function extractIRIFromLinkHeaders(name_in_the_link, headers) {
-      const link = headers.link
-      const idx_end_of_stylesheet = link.lastIndexOf(name_in_the_link)
-      let start_iri_style = -1
-      let end_iri_style = -1
-      let i = idx_end_of_stylesheet 
-      while (i > 0) {
-        i--
-        if (link[i] === '>')
-          end_iri_style = i
-        if (link[i] === '<') {
-          start_iri_style = i + 1
-          break
+      if(headers.link){
+        const link = headers.link
+        const idx_end_of_stylesheet = link.lastIndexOf(name_in_the_link)
+        let start_iri_style = -1
+        let end_iri_style = -1
+        let i = idx_end_of_stylesheet 
+        while (i > 0) {
+          i--
+          if (link[i] === '>')
+            end_iri_style = i
+          if (link[i] === '<') {
+            start_iri_style = i + 1
+            break
+          }
         }
+        return link.substring(start_iri_style, end_iri_style )
+      } else {
+        return null
       }
-      
-      return link.substring(start_iri_style, end_iri_style )
-
     }
 
     function styleFromHeaders(headers) {
@@ -151,7 +153,7 @@ export default function App() {
         let  image_layer_ol = await facadeOL.addHyperResourceImageLayer(a_GeoHyperLayerResource.iri)  
         a_GeoHyperLayerResource.layer = image_layer_ol
       } else {
-        const response = await request(a_GeoHyperLayerResource.iri)
+        const response = await requestGeobuf(a_GeoHyperLayerResource.iri)
         const headers = response.headers
         const style_iri = styleFromHeaders(headers)
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)
@@ -166,8 +168,9 @@ export default function App() {
     }
 
     async function addLayerFromWMS(a_WMSCapabilityLayer) {
+      //console.log(a_WMSCapabilityLayer)
       let  wms_layer =  facadeOL.addWMSLayer(a_WMSCapabilityLayer)
-      let arr = layersResource.concat([wms_layer]) 
+      let arr = layersResource.concat([wms_layer])
       setLayersResource(arr)
     }
 

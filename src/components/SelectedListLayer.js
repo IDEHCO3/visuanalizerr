@@ -15,7 +15,7 @@ import OptionsDialog from './OptionsDialog'
 import ClientJoinDialog from './ClientJoinDialog'
 import axios from 'axios';
 import { request } from '../utils/requests';
-import { OptionsLayer } from '../utils/LayerResource';
+import { OptionsLayer, GeoHyperLayerResource } from '../utils/LayerResource';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -41,7 +41,7 @@ export default function ListLayer(props) {
   const [ clientJoinDialogIsOpen, setClientJoinDialogIsOpen ] = useState(false)
   const [ zIndexOfClickedLayer, setZIndexOfClickedLayer ] = useState(0)
 
-  function switchHandleChange(event, is_ckecked) {  
+  function switchHandleChange(event, is_ckecked) {
     props.switchSelectedLayerResource(event.target.value, is_ckecked)
   };
 
@@ -80,24 +80,33 @@ export default function ListLayer(props) {
       <List>
         {props.layersResource.map( ( layer, index) => (
           <ListItem key={index}>
-            <ButtonGroup color="primary">
+          
+            { layer instanceof GeoHyperLayerResource ?
+              <ButtonGroup color="primary">
+                <Tooltip title="Remover camada">
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={() => iconHandleClickDelete(layer)}>
+                    <DeleteIcon />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Opções da camada">
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickOptionDialog(layer)}> 
+                    <Icon>settings</Icon> 
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Junção de dados">
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickClientJoinDialog(layer)}> 
+                    <AddCircleOutlineIcon/>
+                  </Button>
+                </Tooltip>
+              </ButtonGroup>
+            : 
               <Tooltip title="Remover camada">
                 <Button variant="contained" color="primary" className={classes.Button} onClick={() => iconHandleClickDelete(layer)}>
                   <DeleteIcon />
                 </Button>
               </Tooltip>
-              <Tooltip title="Opções da camada">
-                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickOptionDialog(layer)}> 
-                  <Icon>settings</Icon> 
-                </Button>
-              </Tooltip>
-              <Tooltip title="Junção de dados">
-                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickClientJoinDialog(layer)}> 
-                  <AddCircleOutlineIcon/>
-                </Button>
-              </Tooltip>
-            </ButtonGroup>
-            
+            }
+    
             <ListItemText id="switch-list-label-wifi" className={classes.layerName} primary={layer.name} />
             <ListItemSecondaryAction>
               <Switch edge="end" onChange={switchHandleChange} checked={layer.activated} value={layer.name} />

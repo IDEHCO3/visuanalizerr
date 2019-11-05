@@ -41,7 +41,7 @@ export class FacadeOL {
 
     //returns a OSM TileLayer as baselayer
     osmBaseLayer() {
-        return new TileLayer({ source: new XYZ({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'}), zIndex: 0 })
+      return new TileLayer({ source: new XYZ({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'}), zIndex: 0 })
     }
 
     //returns a google TileLayer as baselayer
@@ -68,15 +68,14 @@ export class FacadeOL {
     baseLayer(a_baseLayer_name) {
       // name: 'Wikimedia', value: 'wikimedia'}, {name: 'Nenhum', value: null}]
       const layers = {
-          'OSM': this.osmBaseLayer(),
-          'google': this.googleBaseLayer() ,
-          'satelite': this.sateliteBaseLayer(),
-          'watercolor': this.watercolorBaseLayer(),
-          'wikimedia': this.wikimediaBaseLayer(),
-          null: this.nullBaseLayer(),
-          '': this.nullBaseLayer(),
-          
-        }
+        'OSM': this.osmBaseLayer(),
+        'google': this.googleBaseLayer() ,
+        'satelite': this.sateliteBaseLayer(),
+        'watercolor': this.watercolorBaseLayer(),
+        'wikimedia': this.wikimediaBaseLayer(),
+        null: this.nullBaseLayer(),
+        '': this.nullBaseLayer(),
+      }
       return layers[a_baseLayer_name]
     }
 
@@ -98,10 +97,11 @@ export class FacadeOL {
     }
 
     getWMSCapabilityLayers(requestedXml) {
-      let capability_json = this.getWMSCapabilitiesAsJSON(requestedXml)
-      let layers = capability_json.Capability.Layer.Layer
+      const capability_json = this.getWMSCapabilitiesAsJSON(requestedXml)
+      const layers = capability_json.Capability.Layer.Layer
+      const entryPoint = capability_json.Capability.Request.GetCapabilities.DCPType[0].HTTP.Get.OnlineResource
       
-      return layers.map((a_layer) => new WMSCapabilityLayer(a_layer, capability_json.version, capability_json.Service.OnlineResource))
+      return layers.map((a_layer) => new WMSCapabilityLayer(a_layer, capability_json.version, entryPoint))
     }
 
     getWMSMap(wmsLayer) {

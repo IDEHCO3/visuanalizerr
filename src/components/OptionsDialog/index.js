@@ -11,9 +11,9 @@ import Slide from '@material-ui/core/Slide';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-import AttributTab from './AttributTab'
-import OperationTab from './OperationTab'
-import RequestTab from './RequestTab'
+import AttributTab from './Tabs/AttributTab'
+import OperationTab from './Tabs/OperationTab'
+import RequestTab from './Tabs/RequestTab'
 
 const useStyles = makeStyles(theme => ({
   appBar: {

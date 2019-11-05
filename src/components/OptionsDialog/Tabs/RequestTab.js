@@ -14,8 +14,8 @@ import ClearIcon from '@material-ui/icons/Clear';
 import AddIcon from '@material-ui/icons/Add';
 import { green, red } from '@material-ui/core/colors';
 
-import { GeoHyperLayerResource } from '../../utils/LayerResource';
-import { request } from '../../utils/requests';
+import { GeoHyperLayerResource } from '../../../utils/LayerResource';
+import { request } from '../../../utils/requests';
 
 const useStyles = makeStyles(theme => ({
   root: {

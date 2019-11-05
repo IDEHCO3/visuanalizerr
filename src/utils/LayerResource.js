@@ -106,9 +106,9 @@ export class GeoHyperLayerResource extends AbstractLayerResource {
 //This class adresses the Layer in the GetCapabilities from WMS
 export class WMSCapabilityLayer extends AbstractLayerResource {
 
-  constructor(layerFromGetCapability,wms_version, wms_online_resource) {
+  constructor(layerFromGetCapability, wms_version, wms_online_resource) {
     if (layerFromGetCapability != null) {
-      super(null,layerFromGetCapability.url, layerFromGetCapability.Name)
+      super(null, layerFromGetCapability.url, layerFromGetCapability.Name)
       this.name = layerFromGetCapability.Name
       this.title = layerFromGetCapability.Title
       this.metadata = layerFromGetCapability.MetadataURL
@@ -145,8 +145,8 @@ export class ContainerResource {
     
     constructor(array_resource) {
       this.array_resource = array_resource
-      
     }
+    
     addLayerResource ( a_layer_resource) {
       this.array_resource.push(a_layer_resource)
     }

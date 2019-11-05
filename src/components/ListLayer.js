@@ -11,8 +11,7 @@ import Icon from '@material-ui/core/Icon';
 
 import OptionsDialog from './OptionsDialog'
 
-import axios from 'axios';
-import { request } from '../utils/requests';
+import { requestOptions } from '../utils/requests';
 import { OptionsLayer } from '../utils/LayerResource';
 
 const useStyles = makeStyles(theme => ({
@@ -30,7 +29,11 @@ export default function ListLayer(props) {
   const [ optionsLayer, setOptionsLayer ] = useState(new OptionsLayer());
   
   function handleClickAddLayer(item) {
-    props.selectedItemName(item.name, item.isImage)
+    if( props.type === "HypeResource"){
+      props.selectedItemName(item.name, item.isImage)
+    } else {
+      props.selectedItemName(item.name)
+    }
   };
 
   function handleClickImageOrVector(item) {
@@ -44,7 +47,7 @@ export default function ListLayer(props) {
   };
 
   async function requestOptionsLayerInfo(layer) {
-    const response = await request(layer.url, axios.options)
+    const response = await requestOptions(layer.url)
     const json = response.data
     let an_optionsLayer = new OptionsLayer(json, layer.url)
     setOptionsLayer(an_optionsLayer)
@@ -60,16 +63,21 @@ export default function ListLayer(props) {
         { props.items.map( (item, index) => (
           <ListItem key={index}>
             <ListItemIcon>
-              <IconButton className={classes.iconButton} color="primary" aria-label="Info" onClick={() => handleClickOptionDialog(item)}>
-                <Tooltip title="Opções da camada" aria-label="Add">
-                  <Icon>settings</Icon>
-                </Tooltip> 
-              </IconButton>
+              { props.type === "HypeResource" ? 
+                <IconButton className={classes.iconButton} color="primary" aria-label="Info" onClick={() => handleClickOptionDialog(item)}>
+                  <Tooltip title="Opções da camada" aria-label="Add">
+                    <Icon>settings</Icon>
+                  </Tooltip> 
+                </IconButton>
+              : 
+                <div/>
+              }
             </ListItemIcon>
             <ListItemText  primary={item.name} />
             <ListItemSecondaryAction>
-              <ButtonGroup color="primary" aria-label="outlined primary button group">
-                <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickImageOrVector(item)}>
+              { props.type === "HypeResource" ? 
+                <ButtonGroup color="primary" aria-label="outlined primary button group">
+                  <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickImageOrVector(item)}>
                   { item.isImage ? 
                     <Tooltip title="Tipo da Camada: Imagem" aria-label="Add">
                       <Icon>image</Icon>
@@ -79,11 +87,16 @@ export default function ListLayer(props) {
                     <Icon>grain</Icon>
                     </Tooltip>
                   }
-                </Button>
+                  </Button>
+                  <Tooltip title="Adicionar camada" aria-label="Add">
+                    <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickAddLayer(item)}> <Icon>queue</Icon> </Button>
+                  </Tooltip>
+                </ButtonGroup>
+              :
                 <Tooltip title="Adicionar camada" aria-label="Add">
                   <Button variant="contained" color="primary" className={classes.Button} onClick={() => handleClickAddLayer(item)}> <Icon>queue</Icon> </Button>
                 </Tooltip>
-              </ButtonGroup>
+              }
             </ListItemSecondaryAction>
           </ListItem>
         ))}  
