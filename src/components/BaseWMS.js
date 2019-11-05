@@ -1,42 +1,50 @@
 import React, { useState } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
-import NativeSelect from '@material-ui/core/NativeSelect';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
 import ListLayer from './ListLayer';
 import {request} from './../utils/requests';
 
-const styles = theme => ({
-    root: {
-      width: '100%',
-      maxWidth: 360,
-      backgroundColor: theme.palette.background.paper,
-    },  
-    formControl: {
-        margin: 10,
-        minWidth: 120,
-    },
-    selectEmpty: {
-        marginTop: 10,
-    },
-    textField: {
-      marginLeft: 10,
-      marginRight: 10,
-      width: 200,
-    },
-  
- });
+import { InputLabel, MenuItem, FormControl, Select } from '@material-ui/core'; //Select Components
+import { Paper, InputBase, Divider, IconButton, Tooltip } from '@material-ui/core'; // Text input components
 
-function BaseWMS(props) {
+const useStyles = makeStyles( theme => ({
+  buttonGroup: {
+    marginTop: "30px",
+  },
+  textField:{
+    width: "100%",
+  },
+  root: {
+    marginTop: '10px',
+    marginBottom: '10px',
+    padding: '2px 4px',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: "100%",
+  },
+  input: {
+    marginLeft: theme.spacing(1),
+    flex: 1,
+  },
+  iconButton: {
+    padding: 10,
+  },
+  divider: {
+    height: 28,
+    margin: 4,
+  },
+}));
 
-  const classes = props;
-  const [select_url] = useState('');
+
+export default function BaseWMS(props) {
+
+  const classes = useStyles();
   const [text_url, setText_url] =  useState('');
   const [items, setItems] = useState([]);
 
@@ -50,7 +58,6 @@ function BaseWMS(props) {
   };
 
   function textHandleChange(e) {
-    
     setText_url(e.target.value)
   };
 
@@ -82,47 +89,68 @@ function BaseWMS(props) {
           return an_item = item;
     })
     if (an_item) {
+      console.log(an_item)
       props.addLayerFromWMS(an_item)
     }
   };
 
   return (
-    <div>
-      <FormControl className={classes.formControl}>
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
         <Typography variant="h6">Urls de entrada </Typography>
-        <NativeSelect value={select_url} onChange={selectHandleChange} >
-          <option value=""/>
-          
-          <option value="http://www.geoservicos.inde.gov.br/geoserver/BNDES/wms">Banco Nacional de Desenvolvimento Econômico e Social-BNDES</option>
-          <option value="https://geoservicos.ibge.gov.br/geoserver/ows?service=wms&version=1.3.0&request=GetCapabilities">Instituto Brasileiro de Geografia e Estatística-IBGE</option>
-          <option value="http://ggt-des.ibge.gov.br/geoserver-ccar/ows?service=wms&version=1.3.0&request=GetCapabilities">DES/IBGE/CCAR</option>
-          
-        </NativeSelect>
-        <Grid container spacing={8}>
-          <Grid item xs={10}>
-            <TextField  id="standard-name" label="Url"  className={classes.textField} value={text_url} onChange={textHandleChange} margin="normal"  fullWidth/>
-          </Grid>
-          <Grid item xs={1}>
-              <Tooltip title="Pesquisar camadas" aria-label="Add">
-                <IconButton className={classes.iconButton} aria-label="Search" onClick={iconHandleClickSearch} bottom="true" ><SearchIcon color="primary"/></IconButton>
-              </Tooltip>  
-          </Grid>
-          <Grid item xs={1}>
-            <Tooltip title="Remover camadas" aria-label="Add">
-            <IconButton className={classes.iconButton} aria-label="Search" onClick={iconHandleClickHighlightOff} bottom="true" >
-              <HighlightOffIcon  color="error"/>
-            </IconButton>
-            </Tooltip >
-          </Grid>
-        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+      <FormControl className={classes.formControl}>
+        <InputLabel htmlFor="age-simple">Serviços mais utilizados</InputLabel>
+        <Select
+          value={text_url}
+          onChange={selectHandleChange}
+          name='Api'
+          autoWidth
+        >
+          <MenuItem value={""}></MenuItem>
+          <MenuItem value={"https://geoservicos.ibge.gov.br/geoserver/ows?service=wms&version=1.3.0&request=GetCapabilities"}>
+            Instituto Brasileiro de Geografia e Estatística-IBGE
+          </MenuItem>
+          <MenuItem value={"https://geoservicos.inde.gov.br/geoserver/BNDES/wms/?service=wms&version=1.3.0&request=GetCapabilities"}>
+            Banco Nacional de Desenvolvimento Econômico e Social-BNDES
+          </MenuItem>
+          <MenuItem value={"http://ggt-des.ibge.gov.br/geoserver-ccar/ows?service=wms&version=1.3.0&request=GetCapabilities"}>
+            DES/IBGE/CCAR
+          </MenuItem>
+        </Select>
       </FormControl>
-      <ListLayer 
-        items={items} 
-        selectedItemName={selectedItemName}
-        type={"WMS"}
-      />
-    </div>
-);
-}
+      </Grid>
 
-export default withStyles(styles)(BaseWMS);
+      <Grid item xs={12}>
+      <Paper className={classes.root}>
+        <InputBase
+          className={classes.input}
+          placeholder="Insira a URL da camada"
+          inputProps={{ 'aria-label': 'Insira a URL da camada' }}
+          value={text_url} 
+          onChange={textHandleChange}
+        />
+        <Tooltip title="Pesquisar camadas" aria-label="Add">
+          <IconButton className={classes.iconButton} aria-label="Buscar" onClick={iconHandleClickSearch}>
+            <SearchIcon />
+          </IconButton>  
+        </Tooltip>
+        <Divider className={classes.divider} orientation="vertical" />
+        <Tooltip title="Remover camadas" aria-label="Add">
+          <IconButton className={classes.iconButton} aria-label="directions" onClick={iconHandleClickHighlightOff}>
+            <HighlightOffIcon  color="error" /> 
+          </IconButton>
+        </Tooltip>      
+      </Paper>
+      </Grid>
+      <Grid item xs={12}>
+        <ListLayer 
+          items={items} 
+          selectedItemName={selectedItemName}
+          type={"WMS"}
+        />
+      </Grid>
+    </Grid>
+  )
+}

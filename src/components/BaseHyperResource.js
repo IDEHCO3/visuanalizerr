@@ -4,7 +4,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { request } from './../utils/requests';
+import { request, requestOptions } from './../utils/requests';
 import { GeoHyperLayerResource } from './../utils/LayerResource';
 import ListLayer from './ListLayer';
 
@@ -45,22 +45,29 @@ const useStyles = makeStyles( theme => ({
 export default function BaseHyperResource(props) {
   const classes = useStyles();
   const [text_url, setText_url] =  useState(''); 
-  const [items, setItems] = useState([]);
+  const [layersInAwaiting, setLayersInAwaiting] = useState([]);
   
-  function isEntryPoint(headers) {
-    let id = headers.link.toUpperCase().indexOf('://schema.org/EntryPoint"'.toUpperCase())
-    return id !== -1
+  function isEntryPoint(resposeObject) {
+    if(resposeObject.headers.link){
+      let id = resposeObject.headers.link.toUpperCase().indexOf('://schema.org/EntryPoint"'.toUpperCase())
+      return id !== -1
+    } else if (resposeObject.data["@type"]) { // options body
+      return resposeObject.data["@type"].includes("entrypoint")
+    } else {
+      console.log("ultimo if: false")
+      return false
+    }
   };
   
   function selectedItemName(item_name, isImage) {
     let an_item = null
-    items.forEach((item, index) => {
+    layersInAwaiting.forEach( item => {
       //console.log("nome do array: ",item.name, "nome passado:", item_name) 
       if (item.name === item_name){
         return an_item = item;
-      }
-          
+      }  
     })
+
     if (an_item) {
       props.addLayerFromHyperResource(new GeoHyperLayerResource(null, an_item.url, an_item.name, null, null, isImage ))
     }
@@ -74,26 +81,27 @@ export default function BaseHyperResource(props) {
     setText_url(e.target.value)
   };
 
-  async function iconHandleClickSearch(e) {
+  async function iconHandleClickSearch() {
     if (!text_url || text_url.trim() === '')
       return 
     
-    const result = await request(text_url);
-    let arr = [];
-    if (isEntryPoint(result.headers)) { 
+    const optionsResponse = await requestOptions(text_url)
+    let arr = []
+
+    if (isEntryPoint(optionsResponse)) {
+      const result = await request(text_url);
       let json_entry_point = result.data;
       // Criando array de camadas
       Object.entries(json_entry_point).forEach( ([key, value]) => { arr.push({name: key, url: value, isImage: false}); });  
-          
     } else {
-       let url_entrada = text_url
-       arr.push({name: url_entrada, url: url_entrada})
+      let url_entrada = text_url
+      arr.push({name: url_entrada, url: url_entrada})
     }
-    setItems(arr);
+    setLayersInAwaiting(arr);
   }
 
   function iconHandleClickHighlightOff() {
-    setItems([]);
+    setLayersInAwaiting([]);
   }
 
   return (
@@ -143,7 +151,7 @@ export default function BaseHyperResource(props) {
       </Grid>
       <Grid item xs={12}>
       <ListLayer 
-        items={items} 
+        items={layersInAwaiting} 
         selectedItemName={selectedItemName} 
         addLayerFromHyperResource={props.addLayerFromHyperResource}
         type={'HypeResource'}
