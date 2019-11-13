@@ -123,7 +123,7 @@ export default function OptionsDialog(props) {
   const steps = getSteps();
   const [ activeStep, setActiveStep ] = React.useState(0);
 
-  const [ supportedProperties, setSuportedProperties ] = useState([])
+  const [ layerPropertyList, setLayerPropertyList ] = useState([])
   const [ selectedLayerProperty, setSelectedLayerProperty ] = useState('')
 
   const [ apiUrl, setApiUrl ] = useState('')
@@ -145,7 +145,7 @@ export default function OptionsDialog(props) {
 
   useEffect(() => {
     if(layer.jsonOptions){
-      setSuportedProperties(layer.supportedProperties)
+      setLayerPropertyList(layer.propertyListFromContext)
     }
   }, [layer])
 
@@ -213,7 +213,7 @@ export default function OptionsDialog(props) {
       const response = await requestOptions(URL)
       const json = response.data
       let an_optionsResource = new OptionsLayer(json, URL)
-      setResourcePropertiesList(an_optionsResource.jsonOptions['hydra:supportedProperties'])
+      setResourcePropertiesList(an_optionsResource.propertyListFromContext)
     }
     
   }
@@ -236,8 +236,8 @@ export default function OptionsDialog(props) {
       setPropertiesToAddOnLayer([])
     } else if (propertyList.length > temporaryPropertyToAddList.length) {
       propertyList.forEach( property => {
-        if(!temporaryPropertyToAddList.includes(property["hydra:property"])){
-          temporaryPropertyToAddList.push(property["hydra:property"])
+        if(!temporaryPropertyToAddList.includes(property.name)){
+          temporaryPropertyToAddList.push(property.name)
         }
       })
       setPropertiesToAddOnLayer(temporaryPropertyToAddList)
@@ -318,8 +318,7 @@ export default function OptionsDialog(props) {
         
     })
     
-    await Promise.all(joinResquests)  
-    console.log("terminou")
+    await Promise.all(joinResquests)
   }
 
   return (
@@ -351,16 +350,16 @@ export default function OptionsDialog(props) {
             <TabPanel value={activeStep} index={0}>                                                 {/* FIRST STEP */}
               <Paper className={classes.LayerPropertyesContainer}> 
                 <List dense={false}>
-                { supportedProperties.map( (property, index) => (
+                { layerPropertyList.map( (property, index) => (
                   <ListItem button key={index}>
 
-                    <ListItemText primary={property["hydra:property"]} />
+                    <ListItemText primary={property.name} />
 
                     <ListItemSecondaryAction>
                       <Radio
-                        checked={selectedLayerProperty === property["hydra:property"]}
+                        checked={selectedLayerProperty === property.name}
                         onChange={(event) => setSelectedLayerProperty(event.target.value)}
-                        value={property["hydra:property"]}
+                        value={property.name}
                         name="radio-button-demo"
                       />                       
                     </ListItemSecondaryAction>
@@ -455,20 +454,20 @@ export default function OptionsDialog(props) {
                 { resourcePropertiesList.map( (property, index) => (
                   <ListItem button key={index}>
 
-                    <ListItemText primary={property["hydra:property"]} />
+                    <ListItemText primary={property.name} />
 
                     <ListItemSecondaryAction>
                       <Tooltip title="Atributo para junção" >
                         <Radio
-                          checked={selectedResourceProperty === property["hydra:property"]}
+                          checked={selectedResourceProperty === property.name}
                           onChange={(event) => setSelectedResourceProperty(event.target.value)}
-                          value={property["hydra:property"]}
+                          value={property.name}
                         />
                       </Tooltip>
                       <Tooltip title="Adicionar atrubito na camada" >
                         <Checkbox
-                          checked={propertiesToAddOnLayer.includes(property["hydra:property"])}
-                          onChange={() => handleClickOnCheckBox(property["hydra:property"])}
+                          checked={propertiesToAddOnLayer.includes(property.name)}
+                          onChange={() => handleClickOnCheckBox(property.name)}
                         />
                       </Tooltip>                         
                     </ListItemSecondaryAction>
