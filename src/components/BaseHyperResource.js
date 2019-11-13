@@ -54,7 +54,6 @@ export default function BaseHyperResource(props) {
     } else if (resposeObject.data["@type"]) { // options body
       return resposeObject.data["@type"].includes("entrypoint")
     } else {
-      console.log("ultimo if: false")
       return false
     }
   };

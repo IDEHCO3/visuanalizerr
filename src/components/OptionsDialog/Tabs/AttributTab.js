@@ -20,29 +20,29 @@ const useStyles = makeStyles(theme => ({
 export default function InteractiveList(props) {
   const classes = useStyles();
   const { optionsLayer } = props
-  const [ supportedProperties, setSuportedProperties ] = useState([]) // [{'hydra:property': "aaaaa"}]
+  const [ propertyList, setPropertyList ] = useState([])
 
   useEffect(() => {
     if(optionsLayer.jsonOptions){
-      setSuportedProperties(optionsLayer.supportedProperties)
+      setPropertyList(optionsLayer.propertyListFromContext)
     }
   }, [optionsLayer])
 
   return (
     <List dense={false}>
-    { supportedProperties.map( (property, index) => (
+    { propertyList.map( (property, index) => (
       <ListItem button key={index}>
 
-        <ListItemText primary={property["hydra:property"]} />
+        <ListItemText primary={property.name} />
 
         <ListItemSecondaryAction>
           <Tooltip title="Abrir em nova aba">
-            <Button variant="contained" color="primary" className={classes.button} href={property["contextType"]} target="blank">
+            <Button variant="contained" color="primary" className={classes.button} href={property.type} target="blank">
               Tipo <LaunchIcon className={classes.rightIcon}/>
             </Button>
           </Tooltip>
           <Tooltip title="Abrir em nova aba">
-            <Button variant="contained" color="primary" className={classes.button} href={property["contextId"]} target="blank">
+            <Button variant="contained" color="primary" className={classes.button} href={property.id} target="blank">
               Semantica <LaunchIcon  className={classes.rightIcon}/>
             </Button>
           </Tooltip>

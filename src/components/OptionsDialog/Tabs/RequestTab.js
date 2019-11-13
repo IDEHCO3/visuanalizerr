@@ -62,7 +62,7 @@ const RedButton = withStyles(theme => ({
 export default function RequestTab(props) {
   const classes = useStyles();
   const { optionsLayer } = props
-  const [ supportedProperties, setSuportedProperties ] = useState([])
+  const [ propertyList, setPropertyList ] = useState([])
   const [ supportedOperations, setSupportedOperations ] = useState([])
   const [ attributeSearchRange, setAttributeSearchRange ] = useState({start: 1, amount: 30})
   const [ attributeSamples, setAttributeSamples ] = useState([])
@@ -72,7 +72,7 @@ export default function RequestTab(props) {
 
   useEffect(() => {
     if(optionsLayer.jsonOptions){
-      setSuportedProperties(optionsLayer.supportedProperties)
+      setPropertyList(optionsLayer.propertyListFromContext)
       setSupportedOperations(optionsLayer.supportedOperations)
       setExpressionUrl(optionsLayer.iri)
     }
@@ -252,21 +252,21 @@ export default function RequestTab(props) {
             <Paper className={classes.paper}> 
               <Typography variant="h6" gutterBottom> Atributos  </Typography>
               <List dense={false}>
-              { supportedProperties.map( (property, index) => (
+              { propertyList.map( (property, index) => (
                 <ListItem button key={index}>
 
-                  <ListItemText primary={property["hydra:property"]} />
+                  <ListItemText primary={property.name} />
 
                   <ListItemSecondaryAction>
                     { expressionUrl.includes('{attribute}') ?
                       <Tooltip title="Adicionar atributo na expressão">
-                        <GreenButton size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => includeAttribute(property["hydra:property"])}>
+                        <GreenButton size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => includeAttribute(property.name)}>
                           <AddIcon />
                         </GreenButton>
                       </Tooltip>
                     : 
                       <Tooltip title="Buscar amostras">
-                        <Fab size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => showAttribute(property["hydra:property"])}>
+                        <Fab size="small" color="primary" aria-label="add" className={classes.margin} onClick={() => showAttribute(property.name)}>
                           <SearchIcon />
                         </Fab>
                       </Tooltip>

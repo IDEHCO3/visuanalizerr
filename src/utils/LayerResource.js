@@ -1,13 +1,6 @@
 import {transformExtent} from 'ol/proj'
 
 export class OptionsLayer {
-  /*constructor(supportedProperties, supportedOperations, context,  iriTemplate, iri) {
-    this.supported_properties = supportedProperties;
-    this.supported_operations = supportedOperations.sort((a,b) => a['hydra:operation'] < b['hydra:operation'] ? -1 : 1);
-    this.context = context;
-    this.iri_template = iriTemplate;
-    this.iri = iri
-  }*/
   constructor(json, iri) {
     
     if (json=== undefined){
@@ -18,15 +11,30 @@ export class OptionsLayer {
     this.jsonOptions = json
     this.iri = iri
   }
+
   get id() {
     return this.jsonOptions['@id']
   }
+
   get type() {
     return this.jsonOptions['@type']
   }
+
   get context() {
     return this.jsonOptions['@context']
   }
+
+  get propertyListFromContext(){
+    let propertyList = []
+    Object.entries(this.context).forEach(entry => {
+      let key = entry[0];
+      let value = entry[1];
+      if(value["@id"] && value["@type"] && key !== "subClassOf")
+        propertyList.push({name: key, id: value["@id"], type: value["@type"]})
+    })
+    return propertyList
+  }
+
   get supportedProperties() {
     let properties = this.jsonOptions['hydra:supportedProperties']
 
@@ -54,6 +62,7 @@ export class OptionsLayer {
 
     return properties
   }
+
   get supportedOperations() {
     let operations = this.jsonOptions['hydra:supportedOperations']
 

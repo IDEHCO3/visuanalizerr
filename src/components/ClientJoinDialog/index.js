@@ -21,8 +21,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 
-import axios from 'axios'
-import { request } from '../../utils/requests'
+import { request, requestOptions } from '../../utils/requests'
 import { OptionsLayer } from '../../utils/LayerResource'
 import FinishDialog from './FinishDialog'
 
@@ -124,7 +123,7 @@ export default function OptionsDialog(props) {
   const steps = getSteps();
   const [ activeStep, setActiveStep ] = React.useState(0);
 
-  const [ supportedProperties, setSuportedProperties ] = useState([])
+  const [ layerPropertyList, setLayerPropertyList ] = useState([])
   const [ selectedLayerProperty, setSelectedLayerProperty ] = useState('')
 
   const [ apiUrl, setApiUrl ] = useState('')
@@ -142,18 +141,19 @@ export default function OptionsDialog(props) {
   const [ propertiesToAddOnLayer, setPropertiesToAddOnLayer ] = useState([])
 
   const [ finishDialogIsOpen, setFinishDialogIsOpen ] = useState(false)
-  const [ joinSuccess, setJoinSuccess ] = useState(false)
+  const [ joinSuccess, setJoinSuccess ] = useState()
 
   useEffect(() => {
     if(layer.jsonOptions){
-      setSuportedProperties(layer.supportedProperties)
+      setLayerPropertyList(layer.propertyListFromContext)
     }
   }, [layer])
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if(activeStep === steps.length - 1 ){
-      handleAddProperties()
       handleClose()
+      await handleAddProperties()
+      setFinishDialogIsOpen(true)
     } else {
       setActiveStep(prevActiveStep => prevActiveStep + 1)
     }
@@ -178,13 +178,15 @@ export default function OptionsDialog(props) {
 
   async function checkEntryPoint(URL) { // verify if a url of a Hyper API is a entry point
 
-    const { headers } = await request(URL, axios.head);
-    let id = headers.link.toUpperCase().indexOf('://schema.org/EntryPoint"'.toUpperCase())
-
-    if (id !== -1)
-      return true
-    else
+    const response = await requestOptions(URL);
+    if(response.headers.link){
+      let id = response.headers.link.toUpperCase().indexOf('://schema.org/EntryPoint"'.toUpperCase())
+      return id !== -1
+    } else if (response.data["@type"]) { // options body
+      return response.data["@type"].includes("entrypoint")
+    } else {
       return false
+    }
 
   }
 
@@ -208,10 +210,10 @@ export default function OptionsDialog(props) {
 
     } else {
       setUrlIsValid(true)
-      const response = await request(URL, axios.options)
+      const response = await requestOptions(URL)
       const json = response.data
       let an_optionsResource = new OptionsLayer(json, URL)
-      setResourcePropertiesList(an_optionsResource.jsonOptions['hydra:supportedProperties'])
+      setResourcePropertiesList(an_optionsResource.propertyListFromContext)
     }
     
   }
@@ -234,8 +236,8 @@ export default function OptionsDialog(props) {
       setPropertiesToAddOnLayer([])
     } else if (propertyList.length > temporaryPropertyToAddList.length) {
       propertyList.forEach( property => {
-        if(!temporaryPropertyToAddList.includes(property["hydra:property"])){
-          temporaryPropertyToAddList.push(property["hydra:property"])
+        if(!temporaryPropertyToAddList.includes(property.name)){
+          temporaryPropertyToAddList.push(property.name)
         }
       })
       setPropertiesToAddOnLayer(temporaryPropertyToAddList)
@@ -256,7 +258,7 @@ export default function OptionsDialog(props) {
 
   async function handleAddProperties() {
 
-    function generateUrlList(urlLengthLimit){
+    function generateUrlList(urlLengthLimit=1024){
       let url = ""
       let urlList = []
       for( let i = 0; i < propertiesOfFeaturesOnLayer.length; i++ ){
@@ -278,30 +280,45 @@ export default function OptionsDialog(props) {
       return urlList
     }
     
+    async function urlHasResponseData(url){
+      let response = await request(url)
+      
+        if (response === undefined || response.data.length === 0 ){
+          return false
+        } else {
+          return true
+        }
+    }
+
     let featureList = props.getFeaturesFromVectorLayerOnMap(indexOfLayer)
     const propertiesOfFeaturesOnLayer = props.getPropertiesFromFeatures(featureList)
-    const urlList = generateUrlList(1024)
+    const urlList = generateUrlList()
+    let fisrtUrlIsValid = urlHasResponseData(urlList[0])
 
-    for(let url in urlList){
-      let response = await request(urlList[url])
+    const joinResquests = urlList.map( async url => {
+      if (await fisrtUrlIsValid){
+        let response = await request(url)
       
-      if (response === undefined || response.data.length === 0 ){
-        setJoinSuccess(false)
-        break
-      } else {
-        setJoinSuccess(true)
-        response.data.forEach( apiPropertyObject => {
-          Object.keys(apiPropertyObject).forEach( propertyKey => {
-            if (propertiesToAddOnLayer.includes(propertyKey)) {
-              const IndexOfItem = propertiesOfFeaturesOnLayer.findIndex( propertyObject => propertyObject[selectedLayerProperty] === apiPropertyObject[selectedResourceProperty])
-              let newProperty = {[propertyKey]: apiPropertyObject[propertyKey]}
-              props.addPropertiesInAFeature(featureList[IndexOfItem], newProperty)
-            }
+        if (response === undefined || response.data.length === 0 ){
+          setJoinSuccess(false)
+          return
+        } else {
+          setJoinSuccess(true)
+          response.data.forEach( apiPropertyObject => {
+            Object.keys(apiPropertyObject).forEach( propertyKey => {
+              if (propertiesToAddOnLayer.includes(propertyKey)) {
+                const IndexOfItem = propertiesOfFeaturesOnLayer.findIndex( propertyObject => propertyObject[selectedLayerProperty] === apiPropertyObject[selectedResourceProperty])
+                let newProperty = {[propertyKey]: apiPropertyObject[propertyKey]}
+                props.addPropertiesInAFeature(featureList[IndexOfItem], newProperty)
+              }
+            })
           })
-        })
-      }
-    }
-    setFinishDialogIsOpen(true)
+        }
+      } 
+        
+    })
+    
+    await Promise.all(joinResquests)
   }
 
   return (
@@ -333,16 +350,16 @@ export default function OptionsDialog(props) {
             <TabPanel value={activeStep} index={0}>                                                 {/* FIRST STEP */}
               <Paper className={classes.LayerPropertyesContainer}> 
                 <List dense={false}>
-                { supportedProperties.map( (property, index) => (
+                { layerPropertyList.map( (property, index) => (
                   <ListItem button key={index}>
 
-                    <ListItemText primary={property["hydra:property"]} />
+                    <ListItemText primary={property.name} />
 
                     <ListItemSecondaryAction>
                       <Radio
-                        checked={selectedLayerProperty === property["hydra:property"]}
+                        checked={selectedLayerProperty === property.name}
                         onChange={(event) => setSelectedLayerProperty(event.target.value)}
-                        value={property["hydra:property"]}
+                        value={property.name}
                         name="radio-button-demo"
                       />                       
                     </ListItemSecondaryAction>
@@ -437,20 +454,20 @@ export default function OptionsDialog(props) {
                 { resourcePropertiesList.map( (property, index) => (
                   <ListItem button key={index}>
 
-                    <ListItemText primary={property["hydra:property"]} />
+                    <ListItemText primary={property.name} />
 
                     <ListItemSecondaryAction>
                       <Tooltip title="Atributo para junção" >
                         <Radio
-                          checked={selectedResourceProperty === property["hydra:property"]}
+                          checked={selectedResourceProperty === property.name}
                           onChange={(event) => setSelectedResourceProperty(event.target.value)}
-                          value={property["hydra:property"]}
+                          value={property.name}
                         />
                       </Tooltip>
                       <Tooltip title="Adicionar atrubito na camada" >
                         <Checkbox
-                          checked={propertiesToAddOnLayer.includes(property["hydra:property"])}
-                          onChange={() => handleClickOnCheckBox(property["hydra:property"])}
+                          checked={propertiesToAddOnLayer.includes(property.name)}
+                          onChange={() => handleClickOnCheckBox(property.name)}
                         />
                       </Tooltip>                         
                     </ListItemSecondaryAction>
