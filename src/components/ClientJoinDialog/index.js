@@ -308,8 +308,13 @@ export default function OptionsDialog(props) {
             Object.keys(apiPropertyObject).forEach( propertyKey => {
               if (propertiesToAddOnLayer.includes(propertyKey)) {
                 const IndexOfItem = propertiesOfFeaturesOnLayer.findIndex( propertyObject => propertyObject[selectedLayerProperty] === apiPropertyObject[selectedResourceProperty])
-                let newProperty = {[propertyKey]: apiPropertyObject[propertyKey]}
-                props.addPropertiesInAFeature(featureList[IndexOfItem], newProperty)
+                if(IndexOfItem>=0){
+                  let newProperty = {[propertyKey]: apiPropertyObject[propertyKey]}
+                  debugger
+                  props.addPropertiesInAFeature(featureList[IndexOfItem], newProperty)
+                } else {
+                  console.error("propriedade nao é igual (provavelmente tipo do campo diferente)")
+                }
               }
             })
           })
