@@ -126,6 +126,7 @@ export class FacadeOL {
 
     //recive a feature(OL gerated) object and a object with the new Properties and add this properties to the feature 
     addPropertiesInAFeature(OlFeature, newProperties) {
+      debugger
       OlFeature.setProperties(newProperties)
     }
 

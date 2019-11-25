@@ -17,6 +17,7 @@ import LayersIcon from '@material-ui/icons/Layers';
 import BaseLayer from './components/BaseLayer';
 import BaseHyperResource from './components/BaseHyperResource';
 import BaseWMS from './components/BaseWMS';
+import BaseWFS from './components/BaseWFS';
 import SelectedListLayer from './components/SelectedListLayer';
 import {requestGeobuf} from './utils/requests';
 
@@ -78,7 +79,7 @@ export default function App() {
     const [drawerIsOpen, setDrawerIsOpen] = useState(true);
     const [layersResource, setLayersResource] = useState([]);
     const [popupElementRef]  = useState(React.createRef())
-    const [expanded, setExpanded] = React.useState([false,true,false,true]);
+    const [expanded, setExpanded] = React.useState([false,true,false,false,true]);
 
     const handleChangeOnPanel = position => (event) => {
       let temporaryIsExpanded = expanded.slice(0);
@@ -244,6 +245,15 @@ export default function App() {
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
                 <ExpansionPanel expanded={expanded[3] === true} onChange={handleChangeOnPanel(3)}>
+                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                  <LayersIcon className={classes.icon } color="primary"/>
+                  <Typography > Geo serviços WFS </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <BaseWFS facadeOL={facadeOL} addLayerFromWMS={addLayerFromWMS}/>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <ExpansionPanel expanded={expanded[4] === true} onChange={handleChangeOnPanel(4)}>
                   <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <LayersIcon className={classes.icon } color="inherit" />
                     <Typography > Camadas selecionadas </Typography>
