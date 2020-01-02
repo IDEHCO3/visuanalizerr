@@ -72,7 +72,18 @@ export default function BaseWMS(props) {
       }
       else {
         let response = await request(text_url)
-        arr = props.facadeOL.getWMSCapabilityLayers(response.data)
+        if (response)
+          arr = props.facadeOL.getWMSCapabilityLayers(response.data)
+        else {
+          try {
+            let response = await request('http://ggt-des.ibge.gov.br/cors-anywhere/' + text_url)
+            arr = props.facadeOL.getWMSCapabilityLayers(response.data)
+          } catch (e)  {
+            console.log(e)
+          }
+        }    
+
+          
       }
       
     setItems(arr);
