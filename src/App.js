@@ -79,7 +79,7 @@ export default function App() {
     const [drawerIsOpen, setDrawerIsOpen] = useState(true);
     const [layersResource, setLayersResource] = useState([]);
     const [popupElementRef]  = useState(React.createRef())
-    const [expanded, setExpanded] = React.useState([false,true,false,false,true]);
+    const [expanded, setExpanded] = React.useState([false,false,false,false,true]);
 
     const handleChangeOnPanel = position => (event) => {
       let temporaryIsExpanded = expanded.slice(0);
@@ -155,6 +155,8 @@ export default function App() {
         a_GeoHyperLayerResource.layer = image_layer_ol
       } else {
         const response = await requestGeobuf(a_GeoHyperLayerResource.iri)
+        if(!response)
+          return
         const headers = response.headers
         const style_iri = styleFromHeaders(headers)
         let  vector_layer_ol = await facadeOL.addVectorLayerFromGeoJSON(response.data, style_iri)

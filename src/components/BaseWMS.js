@@ -5,7 +5,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Grid from '@material-ui/core/Grid';
 import ListLayer from './ListLayer';
-import {request} from './../utils/requests';
+import {requestGet} from './../utils/requests';
 
 import { InputLabel, MenuItem, FormControl, Select } from '@material-ui/core'; //Select Components
 import { Paper, InputBase, Divider, IconButton, Tooltip } from '@material-ui/core'; // Text input components
@@ -71,22 +71,15 @@ export default function BaseWMS(props) {
         arr.push({name: text_url, url: text_url})
       }
       else {
-        let response = await request(text_url)
-        if (response)
+        
+        let response = await requestGet(text_url)
+        if (response) {
           arr = props.facadeOL.getWMSCapabilityLayers(response.data)
-        else {
-          try {
-            let response = await request('http://ggt-des.ibge.gov.br/cors-anywhere/' + text_url)
-            arr = props.facadeOL.getWMSCapabilityLayers(response.data)
-          } catch (e)  {
-            console.log(e)
-          }
+          setItems(arr);
         }    
-
           
       }
-      
-    setItems(arr);
+
   };
 
   function iconHandleClickHighlightOff() {

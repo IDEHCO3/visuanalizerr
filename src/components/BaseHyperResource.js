@@ -4,7 +4,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { request, requestOptions } from './../utils/requests';
+import { requestGet, requestOptions } from './../utils/requests';
 import { GeoHyperLayerResource } from './../utils/LayerResource';
 import ListLayer from './ListLayer';
 
@@ -85,10 +85,15 @@ export default function BaseHyperResource(props) {
       return 
     
     const optionsResponse = await requestOptions(text_url)
+    if (!optionsResponse) 
+      return alert('Houce algum problema com a requisição options em: ' + text_url)
+    
     let arr = []
 
     if (isEntryPoint(optionsResponse)) {
-      const result = await request(text_url);
+      const result = await requestGet(text_url);
+      if(!result)
+        return 
       let json_entry_point = result.data;
       // Criando array de camadas
       Object.entries(json_entry_point).forEach( ([key, value]) => { arr.push({name: key, url: value, isImage: false}); });  
