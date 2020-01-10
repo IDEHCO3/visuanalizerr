@@ -10,6 +10,8 @@ import { Button, Tooltip, ButtonGroup } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
 
 import OptionsDialog from './OptionsDialog'
 import ClientJoinDialog from './ClientJoinDialog'
@@ -56,6 +58,15 @@ export default function ListLayer(props) {
     setZIndexOfClickedLayer(item.layer.values_.zIndex)
     requestOptionsLayerInfo(item)
     setClientJoinDialogIsOpen(true)
+  }
+
+  function iconHandleClickSubpor(item) {
+    //setZIndexOfClickedLayer(item.layer.values_.zIndex)
+    props.changeZOrderLayerResource(item, -1)
+  }
+
+  function iconHandleClickSobrepor(item) {
+    props.changeZOrderLayerResource(item, 1)
   }
 
   function closeClientJoinDialog() {
@@ -110,6 +121,18 @@ export default function ListLayer(props) {
             <ListItemText id="switch-list-label-wifi" className={classes.layerName} primary={layer.name} />
             <ListItemSecondaryAction>
               <Switch edge="end" onChange={switchHandleChange} checked={layer.activated} value={layer.name} />
+            </ListItemSecondaryAction>
+            <ListItemSecondaryAction>
+              <Tooltip title="Subpor camada">
+                    <Button variant="contained" color="primary" className={classes.Button} onClick={() => iconHandleClickSubpor(layer)}> 
+                      <ArrowUpwardIcon/>
+                    </Button>
+              </Tooltip>
+              <Tooltip title="Sobrepor camada">
+                    <Button variant="contained" color="primary" className={classes.Button} onClick={() => iconHandleClickSobrepor(layer)}> 
+                      <ArrowDownwardIcon/>
+                    </Button>
+              </Tooltip>
             </ListItemSecondaryAction>
           </ListItem>
         ))}

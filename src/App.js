@@ -14,6 +14,7 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import LayersIcon from '@material-ui/icons/Layers';
 
+
 import BaseLayer from './components/BaseLayer';
 import BaseHyperResource from './components/BaseHyperResource';
 import BaseWMS from './components/BaseWMS';
@@ -147,7 +148,34 @@ export default function App() {
     function styleFromHeaders(headers) {
       return extractIRIFromLinkHeaders('stylesheet', headers)
     }
+    function canChangeZOrder(index_layer_resource, offset) {
+      if (layersResource.length <= 1)
+        return false
+      if (index_layer_resource + offset < 0 || index_layer_resource + offset >= layersResource.length)
+        return false
+      return true
+    }
+    function changeZOrderLayerResource(a_layer_resource, offset) {
+      //
+      let index_layer_resource = layersResource.findIndex((lr) => lr.name === a_layer_resource.name )
+      if (!canChangeZOrder(index_layer_resource, offset))
+        return 
+      let z_order_layer_resource = a_layer_resource.layer.getZIndex()
+      let index_layer_resource_exchange = index_layer_resource + offset
+      let layer_resource_exchange = layersResource[index_layer_resource_exchange]
+      let z_order_layer_resource_exchange = layer_resource_exchange.layer.values_.zIndex
+      a_layer_resource.layer.setZIndex(z_order_layer_resource_exchange)
+      let arr_lr = layersResource.filter(lr=> lr.name != a_layer_resource.name)
+      index_layer_resource_exchange = arr_lr.findIndex((lr) => lr.name === layer_resource_exchange.name )
+      arr_lr[index_layer_resource_exchange].layer.setZIndex(z_order_layer_resource)
+      if (offset > 0)
+        arr_lr.splice(index_layer_resource_exchange + 1,0,a_layer_resource)      
+      else
+        arr_lr.splice(index_layer_resource_exchange,0,a_layer_resource)      
+      setLayersResource(arr_lr)
+    }
 
+    
     async function addLayerFromHyperResource(a_GeoHyperLayerResource) {
       
       if (a_GeoHyperLayerResource.is_image){
@@ -269,6 +297,7 @@ export default function App() {
                       getPropertiesFromFeatures={getPropertiesFromFeatures}
                       addPropertiesInAFeature={addPropertiesInAFeature}
                       addLayerFromHyperResource={addLayerFromHyperResource}
+                      changeZOrderLayerResource={changeZOrderLayerResource}
                     />
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
