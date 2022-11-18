@@ -4,7 +4,7 @@
   "private": true,
   "author": "Aryel Alves <mr.aryel@gmail.com>",
   "devDependencies": {
-    "react-scripts": "3.0.0"
+    "react-scripts": "5.0.1"
   },
   "repository": {
     "type": "git",
